@@ -1,5 +1,4 @@
-import { PaymentMethod, PaymentInfo, Product } from '@/types';
-import axios from 'axios';
+import { PaymentMethod, Product } from '@/types';
 
 export interface PagamentoResponseSuccess {
   sucesso: boolean;
@@ -72,15 +71,15 @@ export const api = {
       throw new Error('Configuração de pagamento ou ID do produto não informados');
     }
     
-    const axiosHeaders = {
-      'Content-Type': 'application/json',
-      // 'Authorization': `Bearer ${import.meta.env.VITE_API_KEY}`
-    }
-    const apiUrl = ""
-    const data = {
-      idSeguro,
-      idOperacaoMeioPagamento: config.idOperacaoMeioPagamento,
-    }
+    // const axiosHeaders = {
+    //   'Content-Type': 'application/json',
+    //   // 'Authorization': `Bearer ${import.meta.env.VITE_API_KEY}`
+    // }
+    // const apiUrl = ""
+    // const data = {
+    //   idSeguro,
+    //   idOperacaoMeioPagamento: config.idOperacaoMeioPagamento,
+    // }
     try {
       // const res = await axios.post(`${apiUrl}/api/crm/payment/generate`, data, {
       //   headers: axiosHeaders
