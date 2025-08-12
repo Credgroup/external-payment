@@ -18,9 +18,8 @@ services:
         VITE_THEME_FILENAME: ${VITE_THEME_FILENAME:-themepay.css}
         VITE_THEME_BLOBS_PATH: ${VITE_THEME_BLOBS_PATH:-https://wkfkeepinsmarsh.blob.core.windows.net}
         VITE_THEME_FAVICON: ${VITE_THEME_FAVICON:-favicon.png}
+        VITE_WS_PAYMENT_URL: ${VITE_WS_PAYMENT_URL:-ws://10.0.8.4:8100}
     pull_policy: build
-    container_name: external_payment_app
-    restart: unless-stopped
     environment:
       - VITE_ENV=${VITE_ENV:-development}
       - VITE_URL_DOTCORE=${VITE_URL_DOTCORE:-https://devapi.keepins.app/}
@@ -33,5 +32,6 @@ services:
       - VITE_THEME_FILENAME=${VITE_THEME_FILENAME:-themepay.css}
       - VITE_THEME_BLOBS_PATH=${VITE_THEME_BLOBS_PATH:-https://wkfkeepinsmarsh.blob.core.windows.net}
       - VITE_THEME_FAVICON=${VITE_THEME_FAVICON:-favicon.png}
+      - VITE_WS_PAYMENT_URL=${VITE_WS_PAYMENT_URL:-ws://10.0.8.4:8100}
     ports:
       - "8101:80"
