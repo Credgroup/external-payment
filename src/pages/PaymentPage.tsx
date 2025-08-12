@@ -9,10 +9,22 @@ import { Button } from '@/components/ui/button';
 import ProductAvatar from '@/components/ProductAvatar';
 import Container from '@/components/Container';
 
+const getPayMethod = (paymentMethod: PaymentMethod | null) => {
+  if(paymentMethod?.chPagamento === "1"){
+    return "credit_card";
+  }else if(paymentMethod?.chPagamento === "2"){
+    return "debit_card";
+  }else if(paymentMethod?.chPagamento === "4"){
+    return "pix";
+  }else{
+    return null;
+  }
+}
+
 export const PaymentPage = () => {
-  const { product, paymentMethod, setPaymentMethod,  } = useGlobalStore();
+  const { product, paymentMethod, setPaymentMethod } = useGlobalStore();
   const { sendMessage } = useWebSocket();
-  const [payMethodSelected, setPayMethodSelected] = useState<PayMethods>(paymentMethod);
+  const [payMethodSelected, setPayMethodSelected] = useState<PayMethods>(getPayMethod(paymentMethod));
   const [paymentFormValue, setPaymentFormValue] = useState<PaymentMethod | null>(null);
 
   const handleFormValueChange = (method: PaymentMethod) => {
@@ -33,18 +45,6 @@ export const PaymentPage = () => {
     console.log(paymentMethod);
     setPaymentMethod(paymentMethod);
     setPayMethodSelected(getPayMethod(paymentMethod));
-  }
-
-  const getPayMethod = (paymentMethod: PaymentMethod | null) => {
-    if(paymentMethod?.chPagamento === "1"){
-      return "credit_card";
-    }else if(paymentMethod?.chPagamento === "2"){
-      return "debit_card";
-    }else if(paymentMethod?.chPagamento === "4"){
-      return "pix";
-    }else{
-      return null;
-    }
   }
 
   if (!product) {

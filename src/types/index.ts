@@ -77,7 +77,7 @@ export interface GlobalState {
   product: Product | null;
   userData: UserData | null;
   wsRoomId: string | null;
-  paymentMethod: PayMethods | null;
+  paymentMethod: PaymentMethod | null;
   setProduct: (product: Product) => void;
   setUserData: (userData: UserData) => void;
   setWsRoomId: (roomId: string) => void;
