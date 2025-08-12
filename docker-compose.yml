@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  external_pay_ekio:
+    image: "ekio_theme:${VITE_IMAGE_VERSION}"
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_ENV: ${VITE_ENV:-development}
+        VITE_URL_DOTCORE: ${VITE_URL_DOTCORE:-https://devapi.keepins.app/}
+        VITE_URL_AUTH_DOTCORE: ${VITE_URL_AUTH_DOTCORE:-https://devapiauth.keepins.app/}
+        VITE_PLATFORM: ${VITE_PLATFORM:-18844}
+        VITE_AES_KEY: ${VITE_AES_KEY:-7061737323313233}
+        VITE_AES_IV: ${VITE_AES_IV:-7061737323313233}
+        VITE_IMAGE_VERSION: ${VITE_IMAGE_VERSION:-0.0.0}
+        VITE_ENTERPRISE_NAME: ${VITE_ENTERPRISE_NAME:-keepins}
+        VITE_THEME_FILENAME: ${VITE_THEME_FILENAME:-themepay.css}
+        VITE_THEME_BLOBS_PATH: ${VITE_THEME_BLOBS_PATH:-https://wkfkeepinsmarsh.blob.core.windows.net/themescss}
+        VITE_THEME_FAVICON: ${VITE_THEME_FAVICON:-favicon.png}
+    pull_policy: build
+    environment:
+      - VITE_ENV=${VITE_ENV:-development}
+      - VITE_URL_DOTCORE=${VITE_URL_DOTCORE:-https://devapi.keepins.app/}
+      - VITE_URL_AUTH_DOTCORE=${VITE_URL_AUTH_DOTCORE:-https://devapiauth.keepins.app/}
+      - VITE_PLATFORM=${VITE_PLATFORM:-18844}
+      - VITE_AES_KEY=${VITE_AES_KEY:-7061737323313233}
+      - VITE_AES_IV=${VITE_AES_IV:-7061737323313233}
+      - VITE_IMAGE_VERSION=${VITE_IMAGE_VERSION:-0.0.0}
+      - VITE_ENTERPRISE_NAME=${VITE_ENTERPRISE_NAME:-keepins}
+      - VITE_THEME_FILENAME=${VITE_THEME_FILENAME:-themepay.css}
+      - VITE_THEME_BLOBS_PATH=${VITE_THEME_BLOBS_PATH:-https://wkfkeepinsmarsh.blob.core.windows.net/themescss}
+      - VITE_THEME_FAVICON=${VITE_THEME_FAVICON:-favicon.png}
+    ports:
+      - "8101:80"

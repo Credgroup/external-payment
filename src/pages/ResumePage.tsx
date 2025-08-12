@@ -1,0 +1,54 @@
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import ProductUserSummary from '@/components/ProductUserSummary';
+import { useGlobalStore } from '@/store/useGlobalStore';
+import { useWebSocket } from '@/hooks/useWebSocket';
+import { ArrowRight } from 'lucide-react';
+import Container from '@/components/Container';
+import { Button } from '@/components/ui/button';
+
+export const ResumePage = () => {
+  const navigate = useNavigate();
+  const { sendMessage } = useWebSocket();
+  const { product, userData } = useGlobalStore();
+
+  // Emitir evento quando entrar na página de resumo
+  useEffect(() => {
+    sendMessage('ENTERED_SUMMARY');
+  }, [sendMessage]);
+
+  const handleProceed = () => {
+    sendMessage('CLICKED_PROCEED');
+    navigate('/payment');
+  };
+
+  if (!product || !userData) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="card max-w-md w-full text-center">
+          <h1 className="text-xl font-semibold text-gray-900 mb-4">
+            Dados não encontrados
+          </h1>
+          <p className="text-gray-600">
+            Não foi possível carregar os dados do produto ou usuário.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen">
+      <Container>
+        <ProductUserSummary product={product} userData={userData} />
+
+        <div className="sticky bottom-4 flex justify-center">
+          <Button onClick={handleProceed}>
+            <span>Prosseguir para o pagamento</span>
+            <ArrowRight className="w-4 h-4" />
+          </Button>
+        </div>
+      </Container>
+    </div>
+  );
+}; 
