@@ -19,6 +19,8 @@ services:
         VITE_THEME_BLOBS_PATH: ${VITE_THEME_BLOBS_PATH:-https://wkfkeepinsmarsh.blob.core.windows.net}
         VITE_THEME_FAVICON: ${VITE_THEME_FAVICON:-favicon.png}
     pull_policy: build
+    container_name: external_payment_app
+    restart: unless-stopped
     environment:
       - VITE_ENV=${VITE_ENV:-development}
       - VITE_URL_DOTCORE=${VITE_URL_DOTCORE:-https://devapi.keepins.app/}
@@ -33,3 +35,15 @@ services:
       - VITE_THEME_FAVICON=${VITE_THEME_FAVICON:-favicon.png}
     ports:
       - "8101:80"
+    networks:
+      - external_payment_network
+    # Configurações de segurança e isolamento
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  external_payment_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
