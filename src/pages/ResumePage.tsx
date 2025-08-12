@@ -7,6 +7,8 @@ import { ArrowRight } from 'lucide-react';
 import Container from '@/components/Container';
 import { Button } from '@/components/ui/button';
 
+const IMAGE_VERSION = import.meta.env.VITE_IMAGE_VERSION;
+
 export const ResumePage = () => {
   const navigate = useNavigate();
   const { sendMessage } = useWebSocket();
@@ -47,6 +49,9 @@ export const ResumePage = () => {
             <span>Prosseguir para o pagamento</span>
             <ArrowRight className="w-4 h-4" />
           </Button>
+        </div>
+        <div className='flex justify-center items-center'>
+            <span className='text-xs text-zinc-500 w-full text-center'>V{IMAGE_VERSION}</span>
         </div>
       </Container>
     </div>
