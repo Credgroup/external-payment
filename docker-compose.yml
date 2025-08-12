@@ -16,7 +16,7 @@ services:
         VITE_IMAGE_VERSION: ${VITE_IMAGE_VERSION:-0.0.0}
         VITE_ENTERPRISE_NAME: ${VITE_ENTERPRISE_NAME:-keepins}
         VITE_THEME_FILENAME: ${VITE_THEME_FILENAME:-themepay.css}
-        VITE_THEME_BLOBS_PATH: ${VITE_THEME_BLOBS_PATH:-https://wkfkeepinsmarsh.blob.core.windows.net/themescss}
+        VITE_THEME_BLOBS_PATH: ${VITE_THEME_BLOBS_PATH:-https://wkfkeepinsmarsh.blob.core.windows.net}
         VITE_THEME_FAVICON: ${VITE_THEME_FAVICON:-favicon.png}
     pull_policy: build
     environment:
@@ -29,7 +29,7 @@ services:
       - VITE_IMAGE_VERSION=${VITE_IMAGE_VERSION:-0.0.0}
       - VITE_ENTERPRISE_NAME=${VITE_ENTERPRISE_NAME:-keepins}
       - VITE_THEME_FILENAME=${VITE_THEME_FILENAME:-themepay.css}
-      - VITE_THEME_BLOBS_PATH=${VITE_THEME_BLOBS_PATH:-https://wkfkeepinsmarsh.blob.core.windows.net/themescss}
+      - VITE_THEME_BLOBS_PATH=${VITE_THEME_BLOBS_PATH:-https://wkfkeepinsmarsh.blob.core.windows.net}
       - VITE_THEME_FAVICON=${VITE_THEME_FAVICON:-favicon.png}
     ports:
       - "8101:80"
