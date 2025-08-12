@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 export const ResumePage = () => {
   const navigate = useNavigate();
   const { sendMessage } = useWebSocket();
-  const { product, userData } = useGlobalStore();
+  const { productAndUserData } = useGlobalStore();
 
   // Emitir evento quando entrar na página de resumo
   useEffect(() => {
@@ -22,7 +22,7 @@ export const ResumePage = () => {
     navigate('/payment');
   };
 
-  if (!product || !userData) {
+  if (!productAndUserData) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="card max-w-md w-full text-center">
@@ -30,7 +30,7 @@ export const ResumePage = () => {
             Dados não encontrados
           </h1>
           <p className="text-gray-600">
-            Não foi possível carregar os dados do produto ou usuário.
+            Contate o suporte para resolver o problema.
           </p>
         </div>
       </div>
@@ -40,7 +40,7 @@ export const ResumePage = () => {
   return (
     <div className="min-h-screen">
       <Container>
-        <ProductUserSummary product={product} userData={userData} />
+        <ProductUserSummary productAndUserData={productAndUserData} />
 
         <div className="sticky bottom-4 flex justify-center">
           <Button onClick={handleProceed}>

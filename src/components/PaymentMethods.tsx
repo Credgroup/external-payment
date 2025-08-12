@@ -1,17 +1,18 @@
-import { PaymentMethod } from '@/types';
+import { PaymentMethod, UserDataAndProductData } from '@/types';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/services/api';
 
 interface PaymentMethodsProps {
   onMethodSelect: (method: PaymentMethod) => void;
   formValue: PaymentMethod | null;
+  productAndUserData: UserDataAndProductData;
 }
 
-export const PaymentMethods = ({ onMethodSelect, formValue }: PaymentMethodsProps) => {
+export const PaymentMethods = ({ onMethodSelect, formValue, productAndUserData }: PaymentMethodsProps) => {
 
   const { data: methods, isLoading, error } = useQuery({
     queryKey: ['paymentMethods'],
-    queryFn: api.getPaymentMethods,
+    queryFn: () => api.getPaymentMethods(productAndUserData.idProduto.toString()),
   });
 
   const handleMethodSelect = (method: PaymentMethod) => {

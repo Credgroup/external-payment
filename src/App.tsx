@@ -8,46 +8,46 @@ import { useGlobalStore } from '@/store/useGlobalStore';
 import { parseURLParams } from '@/utils/urlParser';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/services/api';
+import PageNotFound from './pages/PageNotFound';
 
 function App() {
-  const { setProduct, setUserData, setWsRoomId } = useGlobalStore();
-  const [urlParams] = useState(parseURLParams());
+  const { setProductAndUserData, setWsRoomId } = useGlobalStore();
+  const [params] = useState(parseURLParams());
   const [isAppReady, setIsAppReady] = useState(false);
 
-  // Buscar dados do produto
-  const { data: product, isLoading: productLoading } = useQuery({
-    queryKey: ['productData', urlParams?.idSeguro],
-    queryFn: () => api.getProductData(urlParams!.idSeguro),
-    enabled: !!urlParams?.idSeguro,
+  // Buscar dados do usuário
+  const { data: productAndUserData, isLoading: userLoading, isError, error, isSuccess} = useQuery({
+    queryKey: ['userData', params?.idSeguro],
+    queryFn: () => api.getUserDataAndProductData(params?.idSeguro!),
+    enabled: !!params?.idSeguro,
+    retry: false,
+    refetchOnWindowFocus: false
   });
 
-  // Buscar dados do usuário
-  const { data: userData, isLoading: userLoading } = useQuery({
-    queryKey: ['userData', urlParams?.idSeguro],
-    queryFn: () => api.getUserData(urlParams!.idSeguro),
-    enabled: !!urlParams?.idSeguro,
-  });
+  useEffect(() => {
+    if(isError){
+      console.log(error)
+    }
+  }, [isError, error])
 
   // Configurar dados no store quando carregados
   useEffect(() => {
-    if (product) {
-      setProduct(product);
+    if (productAndUserData) {
+      setProductAndUserData(productAndUserData);
     }
-    if (userData) {
-      setUserData(userData);
-    }
-    if (urlParams?.idSeguro) {
-      setWsRoomId(urlParams.idSeguro);
+
+    if (params?.idSeguro) {
+      setWsRoomId(params.idSeguro);
     }
 
     // Marcar app como pronto quando todos os dados estiverem carregados
-    if (urlParams && product && userData) {
+    if (params?.idSeguro && productAndUserData) {
       setIsAppReady(true);
     }
-  }, [product, userData, urlParams, setProduct, setUserData, setWsRoomId]);
+  }, [productAndUserData, params?.idSeguro]);
 
   // Loading inicial enquanto carrega dados
-  if (!urlParams) {
+  if (!params?.idSeguro) {
     return (
       <div className="bg-zinc-100 min-h-screen w-full max-w-screen flex items-center justify-center">
         <div className="text-center">
@@ -63,7 +63,7 @@ function App() {
     );
   }
 
-  if (productLoading || userLoading || !isAppReady) {
+  if (isSuccess && (userLoading || !isAppReady)) {
     return (
       <div className="bg-zinc-100 min-h-screen w-full max-w-screen flex items-center justify-center">
         <div className="text-center">
@@ -75,6 +75,21 @@ function App() {
     );
   }
 
+  if(isError || !isSuccess || !productAndUserData){
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="card max-w-md w-full text-center">
+        <h1 className="text-xl font-semibold text-gray-900 mb-4">
+          Dados não encontrados
+        </h1>
+        <p className="text-gray-600">
+          Não foi possível carregar os dados do produto ou usuário.
+        </p>
+      </div>
+    </div>
+    );
+  }
+
   return (
     <div className="bg-zinc-100 min-h-screen w-full max-w-screen">
       <Routes>
@@ -82,7 +97,7 @@ function App() {
         <Route path="/payment" element={<PaymentPage />} />
         <Route path="/success-pay" element={<SuccessPage />} />
         <Route path="/" element={<Navigate to="/resume" replace />} />
-        <Route path="*" element={<Navigate to="/resume" replace />} />
+        <Route path="*" element={<PageNotFound />} />
       </Routes>
       <Toaster />
     </div>

@@ -3,16 +3,16 @@ import { formatCurrency } from '@/utils/urlParser';
 import { CheckCircle, Download, Share2 } from 'lucide-react';
 
 export const PaymentSuccess = () => {
-  const { product } = useGlobalStore();
+  const { productAndUserData } = useGlobalStore();
 
   const handleDownloadReceipt = () => {
     // Simulação de download do comprovante
     const receipt = `
       COMPROVANTE DE PAGAMENTO
       
-      Produto: ${product?.nmProduto}
-      Plano: ${product?.nmProduto}
-      Valor: ${product ? formatCurrency(product.vlPremio) : ''}
+      Produto: ${productAndUserData?.nmProduto}
+      Plano: ${productAndUserData?.nmProduto}
+      Valor: ${productAndUserData ? formatCurrency(productAndUserData.vlPremio) : ''}
       Data: ${new Date().toLocaleDateString('pt-BR')}
       Status: PAGO
       
@@ -35,7 +35,7 @@ export const PaymentSuccess = () => {
       try {
         await navigator.share({
           title: 'Pagamento Confirmado',
-          text: `Pagamento do ${product?.nmProduto} confirmado com sucesso!`,
+          text: `Pagamento do ${productAndUserData?.nmProduto} confirmado com sucesso!`,
           url: window.location.href,
         });
       } catch (error) {
@@ -48,7 +48,7 @@ export const PaymentSuccess = () => {
     }
   };
 
-  if (!product) {
+  if (!productAndUserData) {
     return <div>Produto não encontrado</div>;
   }
 
@@ -75,15 +75,15 @@ export const PaymentSuccess = () => {
               <span className="text-xl">🚗</span>
             </div>
             <div className="text-left">
-              <h3 className="font-semibold text-gray-900">{product.nmProduto}</h3>
-              <p className="text-sm text-gray-600">{product.nmProduto}</p>
+              <h3 className="font-semibold text-gray-900">{productAndUserData.nmProduto}</h3>
+              <p className="text-sm text-gray-600">{productAndUserData.nmProduto}</p>
             </div>
           </div>
           <div className="border-t pt-3">
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Valor pago:</span>
               <span className="font-bold text-success-600 text-lg">
-                {formatCurrency(product.vlPremio)}
+                {formatCurrency(productAndUserData.vlPremio)}
               </span>
             </div>
           </div>
@@ -103,7 +103,7 @@ export const PaymentSuccess = () => {
             Bilhete de Pagamento
           </h4>
           <div className="text-sm text-primary-800 space-y-1">
-            <p>Número: {Math.random().toString(36).substr(2, 9).toUpperCase()}</p>
+            <p>Número: {productAndUserData.nrBilhete}</p>
             <p>Data: {new Date().toLocaleDateString('pt-BR')}</p>
             <p>Hora: {new Date().toLocaleTimeString('pt-BR')}</p>
           </div>

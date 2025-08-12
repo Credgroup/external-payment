@@ -1,4 +1,6 @@
-import { PaymentMethod, Product } from '@/types';
+import { gerarTokenFixo } from '@/lib/utils';
+import { PaymentMethod, UserDataAndProductData } from '@/types';
+import axios from 'axios';
 
 export interface PagamentoResponseSuccess {
   sucesso: boolean;
@@ -16,39 +18,6 @@ export interface DadosPagamento {
   pixCopiaCola: string;
 }
 
-// Simulação de dados da API
-const mockPaymentMethods: PaymentMethod[] = [
-  {
-      idOperacaoMeioPagamento: 3184,
-      idOperacao: 202023,
-      idMeioPagamento: 1005,
-      jsonConf: "{\n    \"paymentCode\": \"\",\n    \"pix\":{\n        \"installment\": 1\n    }\n}",
-      cdStatus: 6,
-      chStatus: "1",
-      dsStatus: "Ativo",
-      dtCadastro: "2025-07-29T12:01:33.297",
-      dtAlteracao: "2025-08-07T17:29:47.543",
-      tpPagamento: 7338,
-      chPagamento: "4",
-      dsPagamento: "Pix",
-      dsMeioPagamento: "AKAD PIX"
-  },
-  {
-      idOperacaoMeioPagamento: 3185,
-      idOperacao: 202023,
-      idMeioPagamento: 1005,
-      jsonConf: "{}",
-      cdStatus: 6,
-      chStatus: "1",
-      dsStatus: "Ativo",
-      dtCadastro: "2025-07-29T12:06:12.027",
-      tpPagamento: 858,
-      chPagamento: "1",
-      dsPagamento: "Cartão de Crédito",
-      dsMeioPagamento: "AKAD CARD"
-  }
-]
-
 type GeneratePixPaymentProps = {
   config: PaymentMethod;
   idSeguro: string;
@@ -56,36 +25,52 @@ type GeneratePixPaymentProps = {
 
 export const api = {
   // Buscar métodos de pagamento disponíveis
-  getPaymentMethods: async (): Promise<PaymentMethod[]> => {
-    console.log('getPaymentMethods');
-    // Simula delay da API
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    return mockPaymentMethods;
+  getPaymentMethods: async (idSeguro?: string | null): Promise<PaymentMethod[]> => {
+
+    if(!idSeguro) {
+      throw new Error('ID do seguro não informado');
+    }
+
+    const res: any = await axios.get(`${import.meta.env.VITE_URL_DOTCORE}/api/crm/payment/public/options/product/${idSeguro}`, {
+      headers: {
+        "Content-Type": "application/json",
+        "X-Token": `${gerarTokenFixo()}`
+    }
+    })
+
+    if("sucesso" in res.data){
+      throw new Error("Erro ao buscar métodos de pagamento");
+    }
+
+
+    return res.data as PaymentMethod[];
   },
 
   // Gerar pagamento PIX
-
   generatePixPayment: async ({config, idSeguro}: Readonly<GeneratePixPaymentProps>): Promise<Partial<PagamentoResponseSuccess>> => {
     console.log('generatePixPayment', config, idSeguro);
     if(!config || !idSeguro) {
       throw new Error('Configuração de pagamento ou ID do produto não informados');
     }
     
-    // const axiosHeaders = {
-    //   'Content-Type': 'application/json',
-    //   // 'Authorization': `Bearer ${import.meta.env.VITE_API_KEY}`
-    // }
-    // const apiUrl = ""
-    // const data = {
-    //   idSeguro,
-    //   idOperacaoMeioPagamento: config.idOperacaoMeioPagamento,
-    // }
     try {
-      // const res = await axios.post(`${apiUrl}/api/crm/payment/generate`, data, {
-      //   headers: axiosHeaders
-      // })
+      const data = { idOperacaoMeioPagamento: config.idOperacaoMeioPagamento, idSeguro: parseInt(idSeguro) }
+      const res: any = await axios.post(
+          `${import.meta.env.VITE_URL_DOTCORE}/api/crm/payment/generate`,
+          data,
+          {
+              headers: {
+                  "Content-Type": "application/json",
+                  "X-Token": `${gerarTokenFixo()}`
+              }
+          }
+      )
+
+      if(!res.data.sucesso){
+        throw new Error(res.data.mensagem);
+      }
   
-      // console.log(res)
+      return res.data as Partial<PagamentoResponseSuccess>;
   
       // if(!res.data.sucesso){
       //   throw new Error(res.data.mensagem);
@@ -114,48 +99,35 @@ export const api = {
     }
   },
 
-  // Buscar dados do produto (simulado)
-  getProductData: async (policyId: string): Promise<Product> => {
-    console.log('getProductData', policyId);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const productData = {
-      "idSeguro": 118621,
-      "idSegurado": 2302696,
-      "idOperacao": 202023,
-      "idProduto": 1100,
-      "nmProduto": "Plano 1 - Sem Assist. Pet",
-      "cdStatusSeguro": 457,
-      "chStatusSeguro": 9,
-      "dsStatusSeguro": "Pré-Adesao",
-      "dtEmissao": "2025-08-07T00:00:00",
-      "vlParcela": 238.8,
-      "vlPremio": 238.8,
-      "tpAdesao": 484,
-      "chAdesao": 1,
-      "dsAdesao": "Padrao",
-      "tpSegurado": 467,
-      "chSegurado": 1,
-      "dsSegurado": "Titular",
-      "idUsuario": 2117,
-      "idExterno": 2302696,
-      "dtCadastro": "2025-08-07T19:39:28.997"
-    }
-    
-    return productData;
-  },
-
   // Buscar dados do usuário (simulado)
-  getUserData: async (idSeguro: string): Promise<any> => {
+  getUserDataAndProductData: async (idSeguro: string): Promise<any> => {
     console.log('getUserData', idSeguro);
-    await new Promise(resolve => setTimeout(resolve, 3000));
+
+    const res: any = await axios.get(`${import.meta.env.VITE_URL_DOTCORE}/api/crm/insurance/find/${idSeguro}`, {
+      headers: {
+        "Content-Type": "application/json",
+        "X-Token": `${gerarTokenFixo()}`
+      }
+    })
+
+
+    console.log(res)
+
+    if(res.status !== 200){
+      throw new Error("Aconteceu algum problema ao buscar os dados da compra");
+    }
+
+    return res.data as UserDataAndProductData;
+
+
+    // await new Promise(resolve => setTimeout(resolve, 3000));
     
-    return {
-      name: 'João Silva Santos',
-      cpf: '123.456.789-00',
-      age: 35,
-      email: 'joao.silva@email.com',
-      phone: '(11) 99999-9999',
-    };
+    // return {
+    //   name: 'João Silva Santos',
+    //   cpf: '123.456.789-00',
+    //   age: 35,
+    //   email: 'joao.silva@email.com',
+    //   phone: '(11) 99999-9999',
+    // };
   },
 }; 

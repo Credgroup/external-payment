@@ -2,19 +2,16 @@ import { create } from 'zustand';
 import { GlobalState } from '@/types';
 
 export const useGlobalStore = create<GlobalState>((set) => ({
-  product: null,
-  userData: null,
+  productAndUserData: null,
   wsRoomId: null,
   paymentMethod: null,
   
-  setProduct: (product) => set({ product }),
-  setUserData: (userData) => set({ userData }),
+  setProductAndUserData: (productAndUserData) => set({ productAndUserData }),
   setWsRoomId: (wsRoomId) => set({ wsRoomId }),
   setPaymentMethod: (paymentMethod) => set({ paymentMethod }),
   
   reset: () => set({
-    product: null,
-    userData: null,
+    productAndUserData: null,
     wsRoomId: null,
     paymentMethod: null,
   }),

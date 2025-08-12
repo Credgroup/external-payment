@@ -18,7 +18,7 @@ interface PixFormProps {
 }
 
 export const PixForm = ({ idSeguro, paymentConfig, onErrorBackFn }: PixFormProps) => {
-  const { product } = useGlobalStore();
+  const { productAndUserData } = useGlobalStore();
   const [paymentInfo, setPaymentInfo] = useState<Partial<PagamentoResponseSuccess> | null>(null);
   const { sendMessage } = useWebSocket();
 
@@ -65,7 +65,7 @@ export const PixForm = ({ idSeguro, paymentConfig, onErrorBackFn }: PixFormProps
     }
   };
 
-  if (!product) {
+  if (!productAndUserData) {
     return <div>Produto não encontrado</div>;
   }
 
@@ -81,9 +81,9 @@ export const PixForm = ({ idSeguro, paymentConfig, onErrorBackFn }: PixFormProps
           }
         </CardTitle>
         {
-            isSuccess && (
+            isSuccess && productAndUserData?.vlPremio && (
               <CardDescription className='text-center'>
-                Valor: <span className="font-bold text-primary-600">{formatCurrency(product.vlPremio)}</span>
+                Valor: <span className="font-bold text-primary-600">{formatCurrency(productAndUserData.vlPremio)}</span>
               </CardDescription>
             )
         }

@@ -18,7 +18,7 @@ services:
         VITE_THEME_FILENAME: ${VITE_THEME_FILENAME:-themepay.css}
         VITE_THEME_BLOBS_PATH: ${VITE_THEME_BLOBS_PATH:-https://wkfkeepinsmarsh.blob.core.windows.net}
         VITE_THEME_FAVICON: ${VITE_THEME_FAVICON:-favicon.png}
-        VITE_WS_PAYMENT_URL: ${VITE_WS_PAYMENT_URL:-ws://10.0.8.4:8100}
+        VITE_WS_PAYMENT_URL: ${VITE_WS_PAYMENT_URL:-wss://devwspayment.ekio.digital}
     pull_policy: build
     environment:
       - VITE_ENV=${VITE_ENV:-development}
@@ -32,6 +32,6 @@ services:
       - VITE_THEME_FILENAME=${VITE_THEME_FILENAME:-themepay.css}
       - VITE_THEME_BLOBS_PATH=${VITE_THEME_BLOBS_PATH:-https://wkfkeepinsmarsh.blob.core.windows.net}
       - VITE_THEME_FAVICON=${VITE_THEME_FAVICON:-favicon.png}
-      - VITE_WS_PAYMENT_URL=${VITE_WS_PAYMENT_URL:-ws://10.0.8.4:8100}
+      - VITE_WS_PAYMENT_URL=${VITE_WS_PAYMENT_URL:-wss://devwspayment.ekio.digital}
     ports:
       - "8101:80"

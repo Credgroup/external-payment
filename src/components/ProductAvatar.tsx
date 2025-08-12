@@ -1,16 +1,27 @@
 import { cn } from "@/lib/utils";
-import { Product } from "@/types";
+import { UserDataAndProductData } from "@/types";
+import { LucideBox } from "lucide-react";
 
-export default function ProductAvatar({product, horizontal}: {product: Product, horizontal?: boolean}) {
+export default function ProductAvatar({productAndUserData, horizontal}: {productAndUserData: UserDataAndProductData, horizontal?: boolean}) {
+   const hasImage = false
+
     if(horizontal){
         return (
             <div className="flex items-center space-x-2">
                 <div className="w-16 h-16 rounded-full flex items-center justify-center overflow-hidden bg-zinc-200 mb-2">
-                    <img src="asdf" alt={product.nmProduto} />
+                    {
+                        hasImage ? (
+                            <div className="w-16 h-16 rounded-full flex items-center justify-center overflow-hidden bg-zinc-200 mb-2">
+                            <img src="asdf" alt={productAndUserData.nmProduto} />
+                        </div>
+                        ) : (
+                            <LucideBox />
+                        )
+                    }
                 </div>
                 <div className="flex flex-col items-start space-y-1">
-                    <h3 className="font-semibold text-base">{product.nmProduto}</h3>
-                    <p className="text-xs text-gray-600">{product.nmProduto}</p>
+                    <h3 className="font-semibold text-base">{productAndUserData.nmProduto}</h3>
+                    <p className="text-xs text-gray-600">{productAndUserData.nmProduto}</p>
                 </div>
             </div>
         )
@@ -18,10 +29,18 @@ export default function ProductAvatar({product, horizontal}: {product: Product, 
     return (
         <div className="flex flex-col items-center space-y-1">
             <div className="w-32 h-32 rounded-full flex items-center justify-center overflow-hidden bg-zinc-200 mb-2">
-                <img src="asdf" alt={product.nmProduto} />
+                {
+                    hasImage ? (
+                        <div className="w-16 h-16 rounded-full flex items-center justify-center overflow-hidden bg-zinc-200 mb-2">
+                        <img src="asdf" alt={productAndUserData.nmProduto} />
+                    </div>
+                    ) : (
+                        <LucideBox className="w-16 h-16" />
+                    )
+                }
             </div>
-            <h3 className="font-semibold text-xl">{product.nmProduto}</h3>
-            <p className="text-sm text-gray-600">{product.nmProduto}</p>
+            <h3 className="font-semibold text-xl">{productAndUserData.nmProduto}</h3>
+            <p className="text-sm text-gray-600">{productAndUserData.nmProduto}</p>
         </div>
     )
 }
