@@ -113,21 +113,11 @@ export const api = {
 
     console.log(res)
 
-    if(res.status !== 200){
-      throw new Error("Aconteceu algum problema ao buscar os dados da compra");
+    if(res.status !== 200 || !res.data){
+      const message = `[ERROR] Erro na chamada de dados do usuário e produto: \n\n ${JSON.stringify(res)}`;
+      throw new Error(message);
     }
 
     return res.data as UserDataAndProductData;
-
-
-    // await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    // return {
-    //   name: 'João Silva Santos',
-    //   cpf: '123.456.789-00',
-    //   age: 35,
-    //   email: 'joao.silva@email.com',
-    //   phone: '(11) 99999-9999',
-    // };
   },
 }; 

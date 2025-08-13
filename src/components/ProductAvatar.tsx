@@ -8,17 +8,17 @@ export default function ProductAvatar({productAndUserData, horizontal}: {product
     if(horizontal){
         return (
             <div className="flex items-center space-x-2">
-                <div className="w-16 h-16 rounded-full flex items-center justify-center overflow-hidden bg-zinc-200 mb-2">
-                    {
-                        hasImage ? (
-                            <div className="w-16 h-16 rounded-full flex items-center justify-center overflow-hidden bg-zinc-200 mb-2">
-                            <img src="asdf" alt={productAndUserData.nmProduto} />
+                {
+                    hasImage ? (
+                        <div className="w-16 h-16 rounded-full flex items-center justify-center overflow-hidden bg-zinc-200 mb-2">
+                            <img src="asdf" alt={productAndUserData.nmProduto} className="w-full h-full object-cover" />
                         </div>
-                        ) : (
-                            <LucideBox />
-                        )
-                    }
-                </div>
+                    ) : (
+                        <div className="w-16 h-16 rounded-full flex items-center justify-center overflow-hidden bg-[var(--paleta-branco-400)] mb-2">
+                            <LucideBox className="w-8 h-8 text-[var(--paleta-preto-400)]" />
+                        </div>
+                    )
+                }
                 <div className="flex flex-col items-start space-y-1">
                     <h3 className="font-semibold text-base">{productAndUserData.nmProduto}</h3>
                     <p className="text-xs text-gray-600">{productAndUserData.nmProduto}</p>
@@ -28,17 +28,17 @@ export default function ProductAvatar({productAndUserData, horizontal}: {product
     }
     return (
         <div className="flex flex-col items-center space-y-1">
-            <div className="w-32 h-32 rounded-full flex items-center justify-center overflow-hidden bg-zinc-200 mb-2">
                 {
                     hasImage ? (
-                        <div className="w-16 h-16 rounded-full flex items-center justify-center overflow-hidden bg-zinc-200 mb-2">
-                        <img src="asdf" alt={productAndUserData.nmProduto} />
-                    </div>
+                        <div className="w-32 h-32 rounded-full flex items-center justify-center overflow-hidden bg-zinc-200 mb-2">
+                            <img src="asdf" alt={productAndUserData.nmProduto} className="w-full h-full object-cover" />
+                        </div>
                     ) : (
-                        <LucideBox className="w-16 h-16" />
+                        <div className="w-32 h-32 rounded-full flex items-center justify-center overflow-hidden bg-[var(--paleta-branco-400)] mb-2">
+                            <LucideBox className="w-16 h-16" />
+                        </div>
                     )
                 }
-            </div>
             <h3 className="font-semibold text-xl">{productAndUserData.nmProduto}</h3>
             <p className="text-sm text-gray-600">{productAndUserData.nmProduto}</p>
         </div>

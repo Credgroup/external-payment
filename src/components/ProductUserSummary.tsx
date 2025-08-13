@@ -5,10 +5,13 @@ import Container from './Container';
 import DataSection from './DataSection';
 
 interface ProductSummaryProps {
-  productAndUserData: UserDataAndProductData;
+  productAndUserData: UserDataAndProductData | null;
 }
 
 export default function ProductUserSummary ({ productAndUserData }: ProductSummaryProps){
+  if (!productAndUserData) {
+    return <div>Dados não encontrados</div>;
+  }
   return (
     <Container className="space-y-6">
       <ProductAvatar productAndUserData={productAndUserData} />

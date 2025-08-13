@@ -53,7 +53,7 @@ export const PaymentSuccess = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-success-50 to-primary-50 flex items-center justify-center p-4">
+    <div className="h-full bg-gradient-to-br from-success-50 to-primary-50 flex items-center justify-center p-4">
       <div className="card max-w-md w-full text-center">
         {/* Ícone de sucesso */}
         <div className="mb-6">

@@ -70,25 +70,24 @@ export const PixForm = ({ idSeguro, paymentConfig, onErrorBackFn }: PixFormProps
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className='text-center'>
-          {
-            isSuccess && 'Pagamento PIX gerado com sucesso'
-          }
-          {
-            isLoading && ''
-          }
-        </CardTitle>
+    <Card className="!p-6">
         {
-            isSuccess && productAndUserData?.vlPremio && (
-              <CardDescription className='text-center'>
-                Valor: <span className="font-bold text-primary-600">{formatCurrency(productAndUserData.vlPremio)}</span>
-              </CardDescription>
-            )
+          !isLoading && isSuccess && (
+            <CardHeader className="!p-0">
+              <CardTitle className='text-center'>
+                Pagamento PIX gerado com sucesso
+              </CardTitle>
+              {
+                  productAndUserData?.vlPremio && (
+                    <CardDescription className='text-center'>
+                      Valor: <span className="font-bold text-primary-600">{formatCurrency(productAndUserData.vlPremio)}</span>
+                    </CardDescription>
+                  )
+              }
+            </CardHeader>
+          )
         }
-      </CardHeader>
-      <CardContent>
+      <CardContent className="!p-0">
         {data && !isLoading && (
           <div className="space-y-6">
             {/* QR Code */}
@@ -143,7 +142,7 @@ export const PixForm = ({ idSeguro, paymentConfig, onErrorBackFn }: PixFormProps
         {
           isLoading && (
             <div className="flex justify-center items-center h-full">
-              <Loader2 className="w-10 h-10 animate-spin" />
+              <Loader2 className="w-8 h-8 animate-spin text-[var(--cor-principal)]" />
             </div>
           )
         }

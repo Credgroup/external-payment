@@ -63,12 +63,8 @@ export const PaymentPage = () => {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="h-full">
       <Container className="min-h-screen flex flex-col justify-center">
-      <button className='absolute top-0 right-0' onClick={()=>{
-        setPayMethodSelected(null);
-        setPaymentFormValue(null);
-      }}>clear</button>
           
           {/* Métodos de pagamento*/}
           {payMethodSelected === null && (

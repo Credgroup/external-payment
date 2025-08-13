@@ -7,8 +7,6 @@ import { ArrowRight } from 'lucide-react';
 import Container from '@/components/Container';
 import { Button } from '@/components/ui/button';
 
-const IMAGE_VERSION = import.meta.env.VITE_IMAGE_VERSION;
-
 export const ResumePage = () => {
   const navigate = useNavigate();
   const { sendMessage } = useWebSocket();
@@ -24,23 +22,15 @@ export const ResumePage = () => {
     navigate('/payment');
   };
 
-  if (!productAndUserData) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="card max-w-md w-full text-center">
-          <h1 className="text-xl font-semibold text-gray-900 mb-4">
-            Dados não encontrados
-          </h1>
-          <p className="text-gray-600">
-            Contate o suporte para resolver o problema.
-          </p>
-        </div>
-      </div>
-    );
-  }
+  useEffect(()=>{
+    if (!productAndUserData) {
+      navigate("/*");
+      return;
+    }
+  }, []);
 
   return (
-    <div className="min-h-screen">
+    <div className="h-full">
       <Container>
         <ProductUserSummary productAndUserData={productAndUserData} />
 
@@ -49,9 +39,6 @@ export const ResumePage = () => {
             <span>Prosseguir para o pagamento</span>
             <ArrowRight className="w-4 h-4" />
           </Button>
-        </div>
-        <div className='flex justify-center items-center'>
-            <span className='text-xs text-zinc-500 w-full text-center'>V{IMAGE_VERSION}</span>
         </div>
       </Container>
     </div>
