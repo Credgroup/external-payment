@@ -2,6 +2,7 @@ import { useEffect, useCallback } from 'react';
 import { useGlobalStore } from '@/store/useGlobalStore';
 import { WebSocketMessage, WebSocketEvents } from '@/types';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 const WS_URL = import.meta.env.VITE_WS_PAYMENT_URL;
 
@@ -11,6 +12,7 @@ let connectionPromise: Promise<void> | null = null;
 
 export const useWebSocket = () => {
   const { wsRoomId } = useGlobalStore();
+  const navigate = useNavigate();
   
   // Device ID fixo para simulação
   const deviceId = 'device_2';
@@ -114,6 +116,7 @@ export const useWebSocket = () => {
       case 'PAYMENT_SUCCESS':
         const successPayload = message.payload as WebSocketEvents['PAYMENT_SUCCESS']['payload'];
         toast.success(`Pagamento realizado com sucesso! ID: ${successPayload.transactionId}`);
+        navigate(`/success-pay`);
         break;
         
       case 'PAYMENT_ERROR':

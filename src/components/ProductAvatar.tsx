@@ -2,12 +2,12 @@ import { cn } from "@/lib/utils";
 import { UserDataAndProductData } from "@/types";
 import { LucideBox } from "lucide-react";
 
-export default function ProductAvatar({productAndUserData, horizontal}: {productAndUserData: UserDataAndProductData, horizontal?: boolean}) {
+export default function ProductAvatar({productAndUserData, horizontal, className}: {productAndUserData: UserDataAndProductData, horizontal?: boolean, className?: string}) {
    const hasImage = false
 
     if(horizontal){
         return (
-            <div className="flex items-center space-x-2">
+            <div className={cn("flex items-center space-x-2", className)}>
                 {
                     hasImage ? (
                         <div className="w-16 h-16 rounded-full flex items-center justify-center overflow-hidden bg-zinc-200 mb-2">
@@ -27,7 +27,7 @@ export default function ProductAvatar({productAndUserData, horizontal}: {product
         )
     }
     return (
-        <div className="flex flex-col items-center space-y-1">
+        <div className={cn("flex flex-col items-center space-y-1", className)}>
                 {
                     hasImage ? (
                         <div className="w-32 h-32 rounded-full flex items-center justify-center overflow-hidden bg-zinc-200 mb-2">
