@@ -42,6 +42,10 @@ export default function ProductUserSummary ({ productAndUserData }: ProductSumma
       {/* Detalhes do Produto */}
       <DataSection title="Detalhes do Produto" withGrid>
           <div className="flex flex-col text-sm w-full">
+            <span className="text-zinc-500">Número da proposta</span>
+            <span className="font-medium text-zinc-900">{productAndUserData.nrProposta}</span>
+          </div>
+          <div className="flex flex-col text-sm w-full">
             <span className="text-zinc-500">Produto</span>
             <span className="font-medium text-zinc-900">{productAndUserData.nmProduto}</span>
           </div>

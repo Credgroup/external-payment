@@ -81,6 +81,8 @@ export const PixForm = ({ idSeguro, paymentConfig, onErrorBackFn }: PixFormProps
                   productAndUserData?.vlPremio && (
                     <CardDescription className='text-center'>
                       Valor: <span className="font-bold text-primary-600">{formatCurrency(productAndUserData.vlPremio)}</span>
+                      <br />
+                      Número da proposta: <span className="font-bold text-primary-600">{productAndUserData.nrProposta}</span>
                     </CardDescription>
                   )
               }
