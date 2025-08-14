@@ -3,13 +3,16 @@ import { formatCurrency } from '@/utils/urlParser';
 import { CheckCircle, Download, Loader2 } from 'lucide-react';
 import { downloadTicket } from '@/services/ticketService';
 import { toast } from 'sonner';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader } from './ui/card';
 import { Button } from './ui/button';
 import ProductAvatar from './ProductAvatar';
+import { useEffect } from 'react';
+import { api } from '@/services/api';
+import { format } from 'date-fns';
 
 export const PaymentSuccess = () => {
-  const { productAndUserData } = useGlobalStore();
+  const { productAndUserData, setProductAndUserData } = useGlobalStore();
 
   const { mutate: downloadTicketMutation, isPending } = useMutation({
     mutationKey: ['downloadTicket'],
@@ -28,6 +31,30 @@ export const PaymentSuccess = () => {
       toast.error('Erro ao gerar bilhete');
     }
   })
+
+  const { data: productAndUserDataUpdated, isLoading: userLoading, isError, error, isSuccess} = useQuery({
+    queryKey: ["updateProductAndUserData"],
+    queryFn: () => api.getUserDataAndProductData(productAndUserData!.idSeguro.toString()),
+    enabled: !!productAndUserData,
+    retry: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
+    staleTime: 0,
+  })
+
+  useEffect(() => {
+    if(isError){
+      toast.error("Não conseguimos buscar os dados do bilhete", {
+        duration: 5000,
+      });
+    }
+  }, [isError, error])
+
+  useEffect(() => {
+    if(isSuccess && productAndUserDataUpdated){
+      setProductAndUserData(productAndUserDataUpdated);
+    }
+  }, [isSuccess, productAndUserDataUpdated])
 
   if (!productAndUserData) {
     return <div>Produto não encontrado</div>;
@@ -73,16 +100,22 @@ export const PaymentSuccess = () => {
           </div>
 
           {/* Bilhete de pagamento */}
-          <div className="bg-primary-50 border border-primary-200 rounded-lg p-4 mb-6">
-            <h4 className="font-semibold text-primary-900 mb-2">
-              Bilhete de Pagamento
-            </h4>
-            <div className="text-sm text-primary-800 space-y-1">
-              <p>Número: {productAndUserData.nrBilhete}</p>
-              <p>Data: {new Date().toLocaleDateString('pt-BR')}</p>
-              <p>Hora: {new Date().toLocaleTimeString('pt-BR')}</p>
+          {!userLoading ? (
+            <div className="bg-primary-50 border border-primary-200 rounded-lg p-4 mb-6">
+              <h4 className="font-semibold text-primary-900 mb-2">
+                Bilhete de Pagamento
+              </h4>
+              <div className="text-sm text-primary-800 space-y-1">
+                <p>Número: {productAndUserDataUpdated.nrBilhete}</p>
+                <p>Data: {format(new Date(productAndUserDataUpdated.dtEmissao), 'dd/MM/yyyy')}</p>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="flex items-center justify-center">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Buscando bilhete...</span>
+            </div>
+          )}
 
           {/* Botões de ação */}
           <div className="space-y-3">

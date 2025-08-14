@@ -42,7 +42,10 @@ export const PaymentPage = () => {
   };
 
   const handleSelectPayMethod = (paymentMethod: PaymentMethod | null) => {
-    console.log(paymentMethod);
+    if(getPayMethod(paymentMethod) === null){
+      toast.error("Selecione um método de pagamento para continuar");
+      return;
+    }
     setPaymentMethod(paymentMethod);
     setPayMethodSelected(getPayMethod(paymentMethod));
   }
@@ -95,7 +98,7 @@ export const PaymentPage = () => {
           {payMethodSelected === null && (
               <div className="sticky flex justify-between items-center gap-4">
                 <ProductAvatar productAndUserData={productAndUserData} horizontal/>
-                <Button onClick={()=>handleSelectPayMethod(paymentFormValue)}>
+                <Button disabled={getPayMethod(paymentFormValue) === null} onClick={()=>handleSelectPayMethod(paymentFormValue)}>
                   <span>Prosseguir</span>
                 </Button>
               </div>
