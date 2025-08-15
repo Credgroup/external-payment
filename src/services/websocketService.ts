@@ -1,15 +1,7 @@
 import { WebSocketMessage, WebSocketEvents } from '@/types';
-import { 
-  sanitizeInput, 
-  validateURLParams, 
-  logSecurityEvent,
-  SECURITY_CONFIG 
-} from '@/lib/security';
 
 const WS_URL = import.meta.env.VITE_WS_PAYMENT_URL;
 const RECONNECT_INTERVAL = 10000; // 10 segundos
-const MAX_MESSAGE_SIZE = 1024 * 1024; // 1MB
-const MAX_RECONNECT_ATTEMPTS = 10;
 
 class WebSocketService {
   private ws: WebSocket | null = null;
@@ -19,11 +11,7 @@ class WebSocketService {
   private reconnectAttempts = 0;
   private messageHandlers: Map<string, (message: WebSocketMessage) => void> = new Map();
   private connectionStateListeners: Set<(connected: boolean) => void> = new Set();
-  private connectionPromise: Promise<void> | null = null;
-  private lastMessageTime = 0;
-  private messageRateLimit = 100; // mensagens por minuto
-  private messageCount = 0;
-  private rateLimitResetTime = Date.now();
+  private connectionPromise: Promise<void> | null = null; // Controla conexões simultâneas
 
   constructor() {
     this.setupEventListeners();
@@ -32,14 +20,14 @@ class WebSocketService {
   private setupEventListeners() {
     // Reconecta quando a conexão de internet volta
     window.addEventListener('online', () => {
-      logSecurityEvent('WEBSOCKET_NETWORK_RESTORED');
+      console.log('Conexão de internet restaurada, tentando reconectar WebSocket...');
       this.reconnect();
     });
 
     // Reconecta quando a página volta a ficar visível
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden && !this.isConnected()) {
-        logSecurityEvent('WEBSOCKET_PAGE_VISIBLE');
+        console.log('Página voltou a ficar visível, tentando reconectar WebSocket...');
         this.reconnect();
       }
     });
@@ -51,99 +39,7 @@ class WebSocketService {
     });
   }
 
-  private validateWSURL(url: string): boolean {
-    if (!url || typeof url !== 'string') {
-      return false;
-    }
-
-    try {
-      const urlObj = new URL(url);
-      return ['ws:', 'wss:'].includes(urlObj.protocol);
-    } catch {
-      return false;
-    }
-  }
-
-  private checkMessageRateLimit(): boolean {
-    const now = Date.now();
-    
-    // Reset rate limit a cada minuto
-    if (now - this.rateLimitResetTime > 60000) {
-      this.messageCount = 0;
-      this.rateLimitResetTime = now;
-    }
-
-    if (this.messageCount >= this.messageRateLimit) {
-      logSecurityEvent('WEBSOCKET_RATE_LIMIT_EXCEEDED', {
-        messageCount: this.messageCount,
-        limit: this.messageRateLimit
-      });
-      return false;
-    }
-
-    this.messageCount++;
-    return true;
-  }
-
-  private sanitizeMessage(message: any): WebSocketMessage | null {
-    try {
-      // Valida tamanho da mensagem
-      const messageStr = JSON.stringify(message);
-      if (messageStr.length > MAX_MESSAGE_SIZE) {
-        logSecurityEvent('WEBSOCKET_MESSAGE_TOO_LARGE', {
-          size: messageStr.length,
-          maxSize: MAX_MESSAGE_SIZE
-        });
-        return null;
-      }
-
-      // Valida estrutura da mensagem
-      if (!message || typeof message !== 'object') {
-        logSecurityEvent('WEBSOCKET_INVALID_MESSAGE_STRUCTURE');
-        return null;
-      }
-
-      if (!message.type || typeof message.type !== 'string') {
-        logSecurityEvent('WEBSOCKET_MISSING_MESSAGE_TYPE');
-        return null;
-      }
-
-      // Sanitiza o tipo da mensagem
-      const sanitizedType = sanitizeInput(message.type, 50);
-      if (!sanitizedType) {
-        logSecurityEvent('WEBSOCKET_INVALID_MESSAGE_TYPE', { type: message.type });
-        return null;
-      }
-
-      // Valida payload
-      if (message.payload && typeof message.payload === 'object') {
-        if (!validateURLParams(message.payload)) {
-          logSecurityEvent('WEBSOCKET_INVALID_PAYLOAD', { payload: message.payload });
-          return null;
-        }
-      }
-
-      return {
-        type: sanitizedType,
-        payload: message.payload || {}
-      } as WebSocketMessage;
-
-    } catch (error) {
-      logSecurityEvent('WEBSOCKET_MESSAGE_SANITIZATION_ERROR', {
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-      return null;
-    }
-  }
-
   public connect(): Promise<void> {
-    // Valida URL do WebSocket
-    if (!this.validateWSURL(WS_URL)) {
-      const error = new Error('URL do WebSocket inválida');
-      logSecurityEvent('WEBSOCKET_INVALID_URL', { url: WS_URL });
-      return Promise.reject(error);
-    }
-
     // Se já existe uma conexão ativa, retorna a promise existente
     if (this.ws?.readyState === WebSocket.OPEN) {
       return Promise.resolve(undefined);
@@ -156,7 +52,7 @@ class WebSocketService {
 
     // Se existe uma conexão fechada, aguarda o fechamento completo
     if (this.ws && this.ws.readyState !== WebSocket.CLOSED) {
-      logSecurityEvent('WEBSOCKET_WAITING_CLOSURE');
+      console.log('Aguardando fechamento da conexão anterior...');
       return new Promise((resolve) => {
         const checkClosed = () => {
           if (this.ws?.readyState === WebSocket.CLOSED) {
@@ -173,54 +69,37 @@ class WebSocketService {
     // Cria nova promise de conexão
     this.connectionPromise = new Promise((resolve, reject) => {
       try {
-        logSecurityEvent('WEBSOCKET_CONNECTING', { url: WS_URL });
+        console.log('Iniciando conexão WebSocket...');
         this.ws = new WebSocket(WS_URL);
 
         this.ws.onopen = () => {
-          logSecurityEvent('WEBSOCKET_CONNECTED');
+          console.log('WebSocket conectado com sucesso');
           this.reconnectAttempts = 0;
           this.isReconnecting = false;
           this.notifyConnectionStateChange(true);
-          this.connectionPromise = null;
+          this.connectionPromise = null; // Limpa a promise
           resolve();
         };
 
         this.ws.onmessage = (event) => {
           try {
-            // Rate limiting
-            if (!this.checkMessageRateLimit()) {
-              logSecurityEvent('WEBSOCKET_RATE_LIMIT_BLOCKED');
-              return;
-            }
-
-            // Valida e sanitiza a mensagem
-            const message = this.sanitizeMessage(JSON.parse(event.data));
-            if (!message) {
-              logSecurityEvent('WEBSOCKET_MESSAGE_REJECTED');
-              return;
-            }
-
+            const message: WebSocketMessage = JSON.parse(event.data);
             this.handleMessage(message);
           } catch (error) {
-            logSecurityEvent('WEBSOCKET_MESSAGE_PROCESSING_ERROR', {
-              error: error instanceof Error ? error.message : 'Unknown error'
-            });
+            console.error('Erro ao processar mensagem WebSocket:', error);
           }
         };
 
         this.ws.onerror = (error) => {
-          logSecurityEvent('WEBSOCKET_ERROR', { error: error.toString() });
-          this.connectionPromise = null;
+          console.error('Erro WebSocket:', error);
+          this.connectionPromise = null; // Limpa a promise
           reject(error);
         };
 
         this.ws.onclose = (event) => {
-          logSecurityEvent('WEBSOCKET_DISCONNECTED', {
-            code: event.code,
-            reason: event.reason
-          });
+          console.log('WebSocket desconectado', event.code, event.reason);
           this.ws = null;
-          this.connectionPromise = null;
+          this.connectionPromise = null; // Limpa a promise
           this.notifyConnectionStateChange(false);
           
           // Se não foi um fechamento intencional, agenda reconexão
@@ -229,10 +108,7 @@ class WebSocketService {
           }
         };
       } catch (error) {
-        logSecurityEvent('WEBSOCKET_CONNECTION_ERROR', {
-          error: error instanceof Error ? error.message : 'Unknown error'
-        });
-        this.connectionPromise = null;
+        this.connectionPromise = null; // Limpa a promise
         reject(error);
       }
     });
@@ -245,20 +121,10 @@ class WebSocketService {
 
     this.clearReconnectTimeout();
     
-    // Limita tentativas de reconexão
-    if (this.reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-      logSecurityEvent('WEBSOCKET_MAX_RECONNECT_ATTEMPTS_REACHED', {
-        attempts: this.reconnectAttempts
-      });
-      return;
-    }
-    
     this.reconnectTimeoutId = setTimeout(() => {
       if (this.shouldReconnect && (!this.ws || this.ws.readyState !== WebSocket.OPEN)) {
         this.reconnectAttempts++;
-        logSecurityEvent('WEBSOCKET_RECONNECT_ATTEMPT', {
-          attempt: this.reconnectAttempts
-        });
+        console.log(`Tentativa de reconexão ${this.reconnectAttempts}...`);
         this.reconnect();
       }
     }, RECONNECT_INTERVAL);
@@ -266,7 +132,7 @@ class WebSocketService {
 
   private async reconnect() {
     if (this.isReconnecting) {
-      logSecurityEvent('WEBSOCKET_RECONNECT_ALREADY_IN_PROGRESS');
+      console.log('Reconexão já em andamento, ignorando...');
       return;
     }
 
@@ -274,13 +140,9 @@ class WebSocketService {
     try {
       await this.connect();
     } catch (error) {
-      logSecurityEvent('WEBSOCKET_RECONNECT_ERROR', {
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-      // Continua tentando reconectar até o limite
-      if (this.reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
-        this.scheduleReconnect();
-      }
+      console.error('Erro na reconexão:', error);
+      // Continua tentando reconectar infinitamente
+      this.scheduleReconnect();
     } finally {
       this.isReconnecting = false;
     }
@@ -299,91 +161,49 @@ class WebSocketService {
     roomId: string,
     deviceId: string = 'device_2'
   ): Promise<void> {
-    // Rate limiting
-    if (!this.checkMessageRateLimit()) {
-      throw new Error('Limite de mensagens excedido. Tente novamente em alguns minutos.');
-    }
-
-    // Validação dos parâmetros
-    if (!roomId || typeof roomId !== 'string') {
-      logSecurityEvent('WEBSOCKET_INVALID_ROOM_ID', { roomId });
-      throw new Error('RoomId inválido');
-    }
-
-    if (!type || typeof type !== 'string') {
-      logSecurityEvent('WEBSOCKET_INVALID_MESSAGE_TYPE', { type });
-      throw new Error('Tipo de mensagem inválido');
-    }
-
-    // Sanitização dos parâmetros
-    const sanitizedRoomId = sanitizeInput(roomId, 100);
-    const sanitizedDeviceId = sanitizeInput(deviceId, 50);
-    const sanitizedType = sanitizeInput(type, 50);
-
-    if (!sanitizedRoomId || !sanitizedType) {
-      logSecurityEvent('WEBSOCKET_SANITIZATION_FAILED', {
-        roomId: sanitizedRoomId,
-        type: sanitizedType
-      });
-      throw new Error('Parâmetros inválidos após sanitização');
-    }
-
     // Garante que está conectado
     if (!this.isConnected()) {
       try {
         await this.connect();
       } catch (error) {
-        logSecurityEvent('WEBSOCKET_CONNECTION_FAILED', {
-          error: error instanceof Error ? error.message : 'Unknown error'
-        });
+        console.error('Erro ao conectar para enviar mensagem:', error);
         throw new Error('Erro na conexão. Tentando reconectar...');
       }
     }
 
+    if (!roomId) {
+      throw new Error('RoomId não disponível');
+    }
+
     // Construir o payload completo
     const messagePayload: WebSocketEvents[T]['payload'] = {
-      roomId: sanitizedRoomId,
-      deviceId: sanitizedDeviceId,
+      roomId,
+      deviceId,
       ...payload
     } as WebSocketEvents[T]['payload'];
 
     const message: WebSocketMessage<T> = {
-      type: sanitizedType,
+      type,
       payload: messagePayload
     };
 
     try {
-      logSecurityEvent('WEBSOCKET_SENDING_MESSAGE', {
-        type: sanitizedType,
-        roomId: sanitizedRoomId
-      });
-      
+      console.log('Enviando mensagem WebSocket:', message);
       this.ws?.send(JSON.stringify(message));
     } catch (error) {
-      logSecurityEvent('WEBSOCKET_SEND_ERROR', {
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
+      console.error('Erro ao enviar mensagem WebSocket:', error);
       this.scheduleReconnect();
       throw error;
     }
   }
 
   private handleMessage(message: WebSocketMessage) {
-    logSecurityEvent('WEBSOCKET_MESSAGE_RECEIVED', {
-      type: message.type
-    });
+    console.log('Mensagem recebida:', message);
     
     // Notifica handlers registrados
     const handler = this.messageHandlers.get(message.type);
     if (handler) {
-      try {
-        handler(message);
-      } catch (error) {
-        logSecurityEvent('WEBSOCKET_HANDLER_ERROR', {
-          type: message.type,
-          error: error instanceof Error ? error.message : 'Unknown error'
-        });
-      }
+      handler(message);
     }
   }
 
@@ -413,9 +233,7 @@ class WebSocketService {
       try {
         listener(connected);
       } catch (error) {
-        logSecurityEvent('WEBSOCKET_LISTENER_ERROR', {
-          error: error instanceof Error ? error.message : 'Unknown error'
-        });
+        console.error('Erro no listener de estado de conexão:', error);
       }
     });
   }
@@ -429,7 +247,7 @@ class WebSocketService {
   }
 
   public disconnect(): void {
-    logSecurityEvent('WEBSOCKET_DISCONNECTING');
+    console.log('Desconectando WebSocket intencionalmente...');
     this.shouldReconnect = false;
     this.clearReconnectTimeout();
     
