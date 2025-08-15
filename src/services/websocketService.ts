@@ -53,11 +53,11 @@ class WebSocketService {
     // Se existe uma conexão fechada, aguarda o fechamento completo
     if (this.ws && this.ws.readyState !== WebSocket.CLOSED) {
       console.log('Aguardando fechamento da conexão anterior...');
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         const checkClosed = () => {
           if (this.ws?.readyState === WebSocket.CLOSED) {
             this.ws = null;
-            resolve();
+            resolve(undefined);
           } else {
             setTimeout(checkClosed, 100);
           }
