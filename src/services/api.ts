@@ -81,7 +81,7 @@ export const api = {
   getUserDataAndProductData: async (idSeguro: string): Promise<any> => {
     console.log('getUserData', idSeguro);
 
-    const res: any = await axios.get(`${import.meta.env.VITE_URL_DOTCORE}/api/crm/insurance/find/${idSeguro}`, {
+    const res: any = await axios.get(`${import.meta.env.VITE_URL_DOTCORE}/api/crm/insurance/external/find/${idSeguro}`, {
       headers: {
         "Content-Type": "application/json",
         "X-Token": `${gerarTokenFixo()}`
