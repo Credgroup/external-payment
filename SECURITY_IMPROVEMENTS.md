@@ -11,10 +11,11 @@ Este documento detalha todas as melhorias de segurança implementadas no projeto
 - [x] Headers de segurança HTTP
 - [x] Validação de dados de pagamento
 - [x] Logs de segurança
-- [x] Configuração segura do Nginx
+- [x] Servidor HTTP seguro (Node.js)
 - [x] Container Docker seguro
 - [x] Validação de WebSocket
 - [x] Proteção contra CSRF
+- [x] Configuração para Nginx Proxy Manager
 
 ---
 
@@ -157,7 +158,7 @@ this.ws.onmessage = (event) => {
 ### **Melhorias no Dockerfile:**
 
 #### **Segurança do Container**
-- ✅ Usuário não-root (`nginx-user`)
+- ✅ Usuário não-root (`app-user`)
 - ✅ Imagem Alpine (menor superfície de ataque)
 - ✅ Remoção de arquivos desnecessários
 - ✅ Permissões restritas
@@ -166,63 +167,70 @@ this.ws.onmessage = (event) => {
 #### **Configurações de Segurança**
 ```dockerfile
 # Usuário não-root
-RUN addgroup -g 1001 -S nginx-user && \
-    adduser -S -D -H -u 1001 -h /var/cache/nginx -s /sbin/nologin -G nginx-user -g nginx-user nginx-user
+RUN addgroup -g 1001 -S app-user && \
+    adduser -S -D -H -u 1001 -h /app -s /sbin/nologin -G app-user -g app-user app-user
 
 # Permissões de segurança
-RUN chown -R nginx-user:nginx-user /usr/share/nginx/html && \
-    chmod -R 755 /usr/share/nginx/html
+RUN chown -R app-user:app-user /app && \
+    chmod -R 755 /app
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost/health || exit 1
+    CMD curl -f http://localhost:3000/health || exit 1
 ```
 
 ---
 
-## 🌐 **6. Configuração Segura do Nginx (`nginx-security.conf`)**
+## 🌐 **6. Servidor HTTP Seguro (`server.js`)**
 
-### **Headers de Segurança:**
-```nginx
-# Proteção contra XSS
-add_header X-XSS-Protection "1; mode=block" always;
+### **Funcionalidades de Segurança:**
 
-# Proteção contra clickjacking
-add_header X-Frame-Options "SAMEORIGIN" always;
-
-# Content Security Policy
-add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' wss: https:; frame-ancestors 'self';" always;
-
-# HTTPS Strict Transport Security
-add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+#### **Headers de Segurança**
+```javascript
+const securityHeaders = {
+  'X-Frame-Options': 'SAMEORIGIN',
+  'X-Content-Type-Options': 'nosniff',
+  'X-XSS-Protection': '1; mode=block',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' wss: https:; frame-ancestors 'self';",
+  'Permissions-Policy': 'geolocation=(), microphone=(), camera=()',
+  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains'
+};
 ```
 
-### **Rate Limiting:**
-```nginx
-# Proteção contra força bruta
-limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
-limit_req zone=api burst=20 nodelay;
-```
-
-### **Proteção de Arquivos:**
-```nginx
-# Bloqueia acesso a arquivos sensíveis
-location ~ /\. {
-    deny all;
-    access_log off;
-    log_not_found off;
-}
-
-location ~* \.(env|config|ini|conf|json|xml|yml|yaml)$ {
-    deny all;
-    access_log off;
-    log_not_found off;
-}
-```
+#### **Proteções Implementadas**
+- ✅ Headers de segurança automáticos
+- ✅ Cache control otimizado
+- ✅ Health check endpoint
+- ✅ Tratamento seguro de erros
+- ✅ Graceful shutdown
+- ✅ Logs de requisições
 
 ---
 
-## 📊 **7. Logs de Segurança**
+## 🔧 **7. Configuração para Nginx Proxy Manager**
+
+### **Arquivo de Configuração:**
+- 📄 `NGINX_PROXY_MANAGER_GUIDE.md` - Guia completo de configuração
+
+### **Funcionalidades de Segurança:**
+- ✅ Headers de segurança completos
+- ✅ Rate limiting (10 req/s)
+- ✅ Proteção contra ataques de força bruta
+- ✅ SSL/HTTPS configurado
+- ✅ Proteção de arquivos sensíveis
+- ✅ Otimizações de performance
+- ✅ Logs detalhados
+
+### **Configuração Rápida:**
+1. Container roda na porta **3000**
+2. Configure proxy host no NPM apontando para porta 3000
+3. Use configuração custom do guia
+4. Ative SSL/HTTPS
+
+---
+
+## 📊 **8. Logs de Segurança**
 
 ### **Eventos Monitorados:**
 - ✅ Tentativas de acesso inválido
@@ -245,7 +253,7 @@ logSecurityEvent('INVALID_INSURANCE_ID', {
 
 ---
 
-## 🔍 **8. Validações Implementadas**
+## 🔍 **9. Validações Implementadas**
 
 ### **Dados de Entrada:**
 - ✅ CPF (validação completa com dígitos verificadores)
@@ -263,10 +271,20 @@ logSecurityEvent('INVALID_INSURANCE_ID', {
 
 ---
 
-## 🚀 **9. Como Usar as Melhorias**
+## 🚀 **10. Como Usar as Melhorias**
 
 ### **Configuração Automática:**
 As melhorias são aplicadas automaticamente. Não é necessário alterar o código existente.
+
+### **Execução:**
+```bash
+# Construir e executar
+docker-compose up --build
+
+# A aplicação estará disponível em:
+# http://localhost:8101 (via Docker)
+# https://seu-dominio.com (via Nginx Proxy Manager)
+```
 
 ### **Monitoramento:**
 ```javascript
@@ -288,7 +306,7 @@ const SECURITY_CONSTANTS = {
 
 ---
 
-## 📈 **10. Benefícios das Melhorias**
+## 📈 **11. Benefícios das Melhorias**
 
 ### **Segurança:**
 - 🔒 Proteção contra XSS
@@ -302,16 +320,18 @@ const SECURITY_CONSTANTS = {
 - 🎯 Cache eficiente para rate limiting
 - 📦 Bundle otimizado
 - 🐳 Container leve e seguro
+- 🌐 Servidor HTTP otimizado
 
 ### **Manutenibilidade:**
 - 📚 Código bem documentado
 - 🔧 Configurações centralizadas
 - 🧪 Fácil de testar
 - 📊 Monitoramento integrado
+- 🔧 Separação clara de responsabilidades
 
 ---
 
-## 🔮 **11. Próximos Passos (Opcionais)**
+## 🔮 **12. Próximos Passos (Opcionais)**
 
 ### **Melhorias Futuras:**
 - [ ] Integração com sistema de logs externo
@@ -334,3 +354,16 @@ const SECURITY_CONSTANTS = {
 As melhorias de segurança implementadas tornam o projeto **external-payment** significativamente mais seguro, protegendo contra os ataques mais comuns e fornecendo uma base sólida para monitoramento e auditoria de segurança.
 
 **Todas as funcionalidades existentes foram preservadas**, garantindo que a experiência do usuário permaneça inalterada enquanto a segurança é drasticamente melhorada.
+
+### **Arquitetura Final:**
+```
+🌐 Nginx Proxy Manager (SSL/HTTPS + Segurança)
+    ↓
+🐳 Container Docker (Node.js + App React)
+    ↓
+🔒 Módulo de Segurança (Validações + Rate Limiting)
+    ↓
+⚡ Aplicação React (Funcionalidades Preservadas)
+```
+
+A aplicação agora está protegida em múltiplas camadas de segurança! 🛡️

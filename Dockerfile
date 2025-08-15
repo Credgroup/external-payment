@@ -24,8 +24,8 @@ WORKDIR /app
 COPY package.json ./
 COPY package-lock.json ./
 
-# Instala as dependências
-RUN npm ci --only=production && npm cache clean --force
+# Instala TODAS as dependências (incluindo devDependencies para o build)
+RUN npm ci
 
 # Copia o restante do código
 COPY . .
