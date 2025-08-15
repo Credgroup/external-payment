@@ -1,21 +1,21 @@
 # Etapa 1: Build do App com Vite
 FROM node:20-alpine AS builder
 
-# ARGS SECTION
-ARG VITE_ENV
-ARG VITE_IMAGE_VERSION
-ARG VITE_URL_DOTCORE
-ARG VITE_URL_AUTH_DOTCORE
-ARG VITE_PLATFORM
-ARG VITE_AES_KEY
-ARG VITE_AES_IV
-ARG VITE_ENTERPRISE_NAME
-ARG VITE_THEME_FILENAME
-ARG VITE_THEME_BLOBS_PATH
-ARG VITE_THEME_FAVICON
-ARG VITE_WS_PAYMENT_URL
-ARG VITE_THEME_BLOBS_KEY
-ARG VITE_URL_API_CONVERT_TEMPLATE
+# Define valores padrão para as variáveis de ambiente durante o build
+ENV VITE_ENV=development
+ENV VITE_IMAGE_VERSION=1.0.0
+ENV VITE_URL_DOTCORE=https://devapi.keepins.app/
+ENV VITE_URL_AUTH_DOTCORE=https://devapiauth.keepins.app/
+ENV VITE_PLATFORM=18844
+ENV VITE_AES_KEY=7061737323313233
+ENV VITE_AES_IV=7061737323313233
+ENV VITE_ENTERPRISE_NAME=keepins
+ENV VITE_THEME_FILENAME=themepay.css
+ENV VITE_THEME_BLOBS_PATH=https://wkfkeepinsmarsh.blob.core.windows.net
+ENV VITE_THEME_FAVICON=favicon.png
+ENV VITE_WS_PAYMENT_URL=wss://devwspayment.ekio.digital
+ENV VITE_THEME_BLOBS_KEY=?sp=r&st=2025-05-21T01:16:44Z&se=2026-05-21T09:16:44Z&spr=https&sv=2024-11-04&sr=c&sig=0o75S62Z761Xs2J5GX5XaVRwz%2BlqaGD3trx2uaKZzYw%3D
+ENV VITE_URL_API_CONVERT_TEMPLATE=https://devapiconverttemplate.ekio.digital
 
 # Diretório de trabalho
 WORKDIR /app
@@ -30,20 +30,7 @@ RUN npm ci
 # Copia o restante do código
 COPY . .
 
-# Copia os scripts
-COPY entrypoint.sh ./entrypoint.sh
-COPY definetheme.sh ./definetheme.sh
-
-# Permissões de execução
-RUN chmod +x ./entrypoint.sh ./definetheme.sh
-
-# Executa o entrypoint para gerar o .env
-RUN ./entrypoint.sh
-
-# Substitui o tema no index.html com base no nome da empresa
-RUN ./definetheme.sh
-
-# Build do projeto
+# Build do projeto (sem depender de scripts externos)
 RUN npm run build
 
 # Etapa 2: Servidor HTTP simples
