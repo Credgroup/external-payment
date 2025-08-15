@@ -71,28 +71,6 @@ export const api = {
       }
   
       return res.data as Partial<PagamentoResponseSuccess>;
-  
-      // if(!res.data.sucesso){
-      //   throw new Error(res.data.mensagem);
-      // }
-
-      return {
-        "sucesso": true,
-        "mensagem": "Pagamento gerado com sucesso",
-        "dadosPagamento": {
-            "codePagamentoExterno": "MTExODI4NDc0NDUsNDIxQUVFMUY4QTE1RDU4MUY2RUE2RUQ5OEM1MjFGNUE=",
-            "nrProposta": "PAPCB0000000303",
-            "dtExpericao": "2026-08-08T00:00:00",
-            "nrParcela": 1,
-            "valorParcela": 358.8,
-            "arquivoExterno": "https://azupbrbilling.blob.core.windows.net/public/files/bfd52550-f08a-4070-bbe5-1eda782283f3_732000_2025-08-08_040017.pdf",
-            "pixCopiaCola": "00020101021226910014BR.GOV.BCB.PIX2569spi-h.itau.com.br/pix/qr/v2/cobv/af581bdc-624e-4333-af38-1adaddfa6ce05204000053039865802BR5914PMD BASHAR RIO6009SAO PAULO62070503***6304E7DB"
-        }
-    }
-      
-      // return res.data as Partial<PagamentoResponseSuccess>;
-
-
     } catch (error) {
       console.log(error)
       throw new Error('Erro ao gerar pagamento PIX');

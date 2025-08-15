@@ -9,7 +9,8 @@ import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { useWebSocket } from '@/hooks/useWebSocket';
+import { usePixQrCode } from '@/hooks/useGenerateQrCodePix';
+import QRCode from 'react-qr-code';
 
 interface PixFormProps {
   idSeguro: string;
@@ -20,7 +21,8 @@ interface PixFormProps {
 export const PixForm = ({ idSeguro, paymentConfig, onErrorBackFn }: PixFormProps) => {
   const { productAndUserData } = useGlobalStore();
   const [paymentInfo, setPaymentInfo] = useState<Partial<PagamentoResponseSuccess> | null>(null);
-  const { sendMessage } = useWebSocket();
+
+  const { generate, loading: loadingGeneratePix, error: errorGeneratePix, qrCode } = usePixQrCode();
 
   const { data, isLoading, isSuccess, isError, error} = useQuery({
     queryKey: ['generatePixCode', idSeguro],
@@ -28,24 +30,21 @@ export const PixForm = ({ idSeguro, paymentConfig, onErrorBackFn }: PixFormProps
     enabled: !!idSeguro && !!paymentConfig,
     retry: false,
     refetchOnWindowFocus: false,
-    refetchOnMount: true,
+    refetchOnMount: false,
     staleTime: 0,
   })
 
   useEffect(()=>{
     if(isSuccess){
       setPaymentInfo(data);
+      generate(data.dadosPagamento?.pixCopiaCola!);
     }
   }, [isSuccess, data])
 
   useEffect(()=>{
     if(isError && error){
-      console.error('Erro ao gerar pagamento PIX:', error);
-      const errorMessage = (error as Error).message ?? 'Erro desconhecido';
-      sendMessage('PAYMENT_ERROR', {
-        error: errorMessage,
-        code: 'PIX_GENERATION_ERROR',
-      })
+      console.log(error);
+      toast.error('Erro ao gerar pagamento PIX');
     }
   }, [isError, error])
 
@@ -90,20 +89,39 @@ export const PixForm = ({ idSeguro, paymentConfig, onErrorBackFn }: PixFormProps
           )
         }
       <CardContent className="!p-0">
-        {data && !isLoading && (
+        {data && !isLoading && !isError && (
           <div className="space-y-6">
             {/* QR Code */}
             <div className="text-center">
-              <div className="bg-gray-50 rounded-lg p-4 inline-block">
-                <img
-                  src={data.dadosPagamento?.pixCopiaCola}
-                  alt="QR Code PIX"
-                  className="w-48 h-48 mx-auto"
-                />
+              <div className="bg-gray-50 rounded-lg p-4 inline-block aspect-square">
+                {
+                  !loadingGeneratePix && qrCode && (
+                    <QRCode value={qrCode} className='w-full aspect-square'/>
+                )}
+
+                {
+                  loadingGeneratePix && (
+                    <div className="w-48 h-48 mx-auto">
+                      <Loader2 className="w-8 h-8 animate-spin text-[var(--cor-principal)]" />
+                    </div>
+                  )
+                }
+
+                {
+                  errorGeneratePix && (
+                    <div className="w-48 h-48 mx-auto">
+                      <p className="text-sm text-gray-600 mt-2">Erro ao gerar QR Code</p>
+                    </div>
+                  )
+                }
               </div>
-              <p className="text-sm text-gray-600 mt-2">
-                Escaneie o QR Code com seu app bancário
-              </p>
+
+              {
+                !loadingGeneratePix && qrCode && (
+                  <p className="text-sm text-gray-600 mt-2">
+                    Escaneie o QR Code com seu app bancário
+                  </p>
+              )}
             </div>
 
             {/* Código PIX */}
@@ -143,9 +161,7 @@ export const PixForm = ({ idSeguro, paymentConfig, onErrorBackFn }: PixFormProps
 
         {
           isLoading && (
-            <div className="flex justify-center items-center h-full">
-              <Loader2 className="w-8 h-8 animate-spin text-[var(--cor-principal)]" />
-            </div>
+            <PixFormSkeleton />
           )
         }
 
@@ -153,7 +169,7 @@ export const PixForm = ({ idSeguro, paymentConfig, onErrorBackFn }: PixFormProps
           isError && (
             <div className="flex flex-col justify-center items-center h-full">
               <div className='text-center mb-3 space-y-2'>
-                <h1 className="text-xl font-bold">{(error as Error).message}</h1>
+                <h1 className="text-xl font-bold">{(error as Error)?.message}</h1>
                 <p className='text-zinc-500'>Selecione outro método de pagamento</p>
               </div>
               <Button onClick={()=>{
@@ -170,3 +186,21 @@ export const PixForm = ({ idSeguro, paymentConfig, onErrorBackFn }: PixFormProps
     </Card>
   );
 }; 
+
+
+export default function PixFormSkeleton(){
+  return (
+    <div className='flex flex-col gap-y-4 w-full justify-center items-center'>
+      <div className='flex gap-y-2 w-full flex-col items-center'>
+        <div className="w-3/5 h-8 bg-zinc-200 rounded-md animate-pulse"></div>
+        <div className="w-1/3 h-8 bg-zinc-200 rounded-md animate-pulse"></div>
+      </div>
+      <div className='w-full max-w-72 aspect-square bg-zinc-200 rounded-lg animate-pulse'></div>
+      <div className='flex gap-y-2 flex-col items-center w-4/5'>
+        <div className='w-full h-8 bg-zinc-200 rounded-md animate-pulse'></div>
+        <div className='w-full h-8 bg-zinc-200 rounded-md animate-pulse'></div>
+
+      </div>
+    </div>
+  )
+}
