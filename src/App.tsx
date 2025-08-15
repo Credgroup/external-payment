@@ -11,6 +11,7 @@ import { api } from '@/services/api';
 import PageNotFound from './pages/PageNotFound';
 import { LucideHelpCircle, LucideLoader2, LucideSearchX } from 'lucide-react';
 import PrivateLayout from './components/PrivateLayout';
+import { useWebSocketPersistence } from '@/hooks/useWebSocketPersistence';
 
 const IMAGE_VERSION = import.meta.env.VITE_IMAGE_VERSION;
 
@@ -20,6 +21,9 @@ function App() {
 
   const { setProductAndUserData, setWsRoomId } = useGlobalStore();
   const [params] = useState(parseURLParams());
+  
+  // Garante que a conexão WebSocket seja mantida durante toda a sessão
+  useWebSocketPersistence();
 
   // Buscar dados do usuário e produto
   const { data: productAndUserData, isLoading: userLoading, isError, error} = useQuery({
