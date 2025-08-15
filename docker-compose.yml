@@ -38,8 +38,8 @@ services:
     ports:
       - "8101:80"
     networks:
-      - bridge
+      - bridge_ekio
 
 networks:
-  bridge:
-    external: true
+  bridge_ekio:
+    driver: bridge
