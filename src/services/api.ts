@@ -56,7 +56,7 @@ export const api = {
     try {
       const data = { idOperacaoMeioPagamento: config.idOperacaoMeioPagamento, idSeguro: parseInt(idSeguro) }
       const res: any = await axios.post(
-          `${import.meta.env.VITE_URL_DOTCORE}/api/crm/payment/generate`,
+          `${import.meta.env.VITE_URL_DOTCORE}/api/crm/payment/external/generate`,
           data,
           {
               headers: {
