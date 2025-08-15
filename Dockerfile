@@ -46,8 +46,8 @@ RUN ./definetheme.sh
 # Build do projeto
 RUN npm run build
 
-# Etapa 2: Servindo o App com NGINX
-FROM nginx:alpine
+# Etapa 2: Servidor HTTP simples
+FROM node:20-alpine
 
 # Instala dependências de segurança
 RUN apk add --no-cache \
@@ -55,48 +55,34 @@ RUN apk add --no-cache \
     && rm -rf /var/cache/apk/*
 
 # Cria usuário não-root para segurança
-RUN addgroup -g 1001 -S nginx-user && \
-    adduser -S -D -H -u 1001 -h /var/cache/nginx -s /sbin/nologin -G nginx-user -g nginx-user nginx-user
+RUN addgroup -g 1001 -S app-user && \
+    adduser -S -D -H -u 1001 -h /app -s /sbin/nologin -G app-user -g app-user app-user
 
-# Copia os arquivos gerados na etapa anterior para a pasta padrão do NGINX
-COPY --from=builder /app/dist /usr/share/nginx/html
+# Copia os arquivos gerados na etapa anterior
+COPY --from=builder /app/dist /app/dist
 
-# Copia configuração de segurança do Nginx
-COPY nginx-security.conf /etc/nginx/conf.d/default.conf
-
-# Configurações de segurança do Nginx
-RUN echo "server_tokens off;" >> /etc/nginx/nginx.conf && \
-    echo "client_max_body_size 10M;" >> /etc/nginx/nginx.conf && \
-    echo "client_body_timeout 30s;" >> /etc/nginx/nginx.conf && \
-    echo "client_header_timeout 30s;" >> /etc/nginx/nginx.conf
+# Copia servidor HTTP simples
+COPY server.js /app/server.js
 
 # Remove arquivos desnecessários para segurança
-RUN rm -rf /usr/share/nginx/html/*.map && \
-    rm -rf /usr/share/nginx/html/*.txt && \
-    rm -rf /usr/share/nginx/html/*.md
+RUN rm -rf /app/dist/*.map && \
+    rm -rf /app/dist/*.txt && \
+    rm -rf /app/dist/*.md
 
 # Configura permissões de segurança
-RUN chown -R nginx-user:nginx-user /usr/share/nginx/html && \
-    chown -R nginx-user:nginx-user /var/cache/nginx && \
-    chown -R nginx-user:nginx-user /var/log/nginx && \
-    chown -R nginx-user:nginx-user /etc/nginx/conf.d && \
-    chmod -R 755 /usr/share/nginx/html && \
-    chmod -R 644 /usr/share/nginx/html/* && \
-    chmod 644 /etc/nginx/conf.d/default.conf
-
-# Cria diretório para logs com permissões corretas
-RUN mkdir -p /var/log/nginx && \
-    chown -R nginx-user:nginx-user /var/log/nginx
+RUN chown -R app-user:app-user /app && \
+    chmod -R 755 /app && \
+    chmod 644 /app/dist/*
 
 # Configuração de saúde
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost/health || exit 1
+    CMD curl -f http://localhost:3000/health || exit 1
 
 # Muda para usuário não-root
-USER nginx-user
+USER app-user
 
-# Expondo a porta padrão do NGINX
-EXPOSE 80
+# Expondo a porta da aplicação
+EXPOSE 3000
 
-# Comando padrão para rodar o NGINX
-CMD ["nginx", "-g", "daemon off;"]
+# Comando para rodar o servidor
+CMD ["node", "/app/server.js"]
