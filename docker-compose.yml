@@ -39,3 +39,4 @@ services:
       - VITE_URL_API_CONVERT_TEMPLATE=${VITE_URL_API_CONVERT_TEMPLATE:-https://devapiconverttemplate.ekio.digital}
     ports:
       - "8101:80"
+    network_mode: "bridge"
