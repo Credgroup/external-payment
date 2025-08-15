@@ -31,7 +31,7 @@ export const api = {
       throw new Error('ID do seguro não informado');
     }
 
-    const res: any = await axios.get(`${import.meta.env.VITE_URL_DOTCORE}/api/crm/payment/public/options/product/${idSeguro}`, {
+    const res: any = await axios.get(`${import.meta.env.VITE_URL_DOTCORE}/api/crm/payment/external/options/product/${idSeguro}`, {
       headers: {
         "Content-Type": "application/json",
         "X-Token": `${gerarTokenFixo()}`

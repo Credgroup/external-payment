@@ -22,7 +22,7 @@ export type GenerateTicketParams = {
 // Função para obter o layout do ticket
 export async function getTicketLayout(idSeguro: string): Promise<TicketLayoutResponse> {
 
-  const response = await axios.post(`${API_URL}/api/crm/insurance/public/generate/ticket`, { idSeguro }, {
+  const response = await axios.post(`${API_URL}/api/crm/insurance/external/generate/ticket`, { idSeguro }, {
     headers: {
       "Content-Type": "application/json",
       "X-Token": `${gerarTokenFixo()}`
@@ -81,7 +81,7 @@ export async function saveTicketToSystem(fileUrl: string, fileName: string, idSe
     "X-Token": `${gerarTokenFixo()}`
   };
 
-  const response = await axios.post(`${API_URL}/api/crm/insurance/public/save/ticket`, {
+  const response = await axios.post(`${API_URL}/api/crm/insurance/external/save/ticket`, {
     tpDocumento: 19868,
     nmDoc: fileName,
     dsDoc: fileUrl,
