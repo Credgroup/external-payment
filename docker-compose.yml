@@ -39,3 +39,7 @@ services:
       - "8101:80"
     networks:
       - bridge
+
+networks:
+  bridge:
+    external: true
