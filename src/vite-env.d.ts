@@ -14,6 +14,7 @@ interface ImportMetaEnv {
   readonly VITE_THEME_FAVICON: string
   readonly VITE_WS_PAYMENT_URL: string
   readonly VITE_THEME_BLOBS_KEY: string
+  readonly VITE_URL_API_CONVERT_TEMPLATE: string
 }
 
 interface ImportMeta {

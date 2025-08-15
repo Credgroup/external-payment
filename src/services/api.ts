@@ -31,7 +31,7 @@ export const api = {
       throw new Error('ID do seguro não informado');
     }
 
-    const res: any = await axios.get(`${import.meta.env.VITE_URL_DOTCORE}/api/crm/payment/public/options/product/${idSeguro}`, {
+    const res: any = await axios.get(`${import.meta.env.VITE_URL_DOTCORE}/api/crm/payment/external/options/product/${idSeguro}`, {
       headers: {
         "Content-Type": "application/json",
         "X-Token": `${gerarTokenFixo()}`
@@ -56,7 +56,7 @@ export const api = {
     try {
       const data = { idOperacaoMeioPagamento: config.idOperacaoMeioPagamento, idSeguro: parseInt(idSeguro) }
       const res: any = await axios.post(
-          `${import.meta.env.VITE_URL_DOTCORE}/api/crm/payment/generate`,
+          `${import.meta.env.VITE_URL_DOTCORE}/api/crm/payment/external/generate`,
           data,
           {
               headers: {
@@ -81,7 +81,7 @@ export const api = {
   getUserDataAndProductData: async (idSeguro: string): Promise<any> => {
     console.log('getUserData', idSeguro);
 
-    const res: any = await axios.get(`${import.meta.env.VITE_URL_DOTCORE}/api/crm/insurance/find/${idSeguro}`, {
+    const res: any = await axios.get(`${import.meta.env.VITE_URL_DOTCORE}/api/crm/insurance/external/find/${idSeguro}`, {
       headers: {
         "Content-Type": "application/json",
         "X-Token": `${gerarTokenFixo()}`

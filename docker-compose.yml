@@ -20,6 +20,7 @@ services:
         VITE_THEME_FAVICON: ${VITE_THEME_FAVICON:-favicon.png}
         VITE_WS_PAYMENT_URL: ${VITE_WS_PAYMENT_URL:-wss://devwspayment.ekio.digital}
         VITE_THEME_BLOBS_KEY: ${VITE_THEME_BLOBS_KEY:-"?sp=r&st=2025-05-21T01:16:44Z&se=2026-05-21T09:16:44Z&spr=https&sv=2024-11-04&sr=c&sig=0o75S62Z761Xs2J5GX5XaVRwz%2BlqaGD3trx2uaKZzYw%3D"}
+        VITE_URL_API_CONVERT_TEMPLATE: ${VITE_URL_API_CONVERT_TEMPLATE:-https://devapiconverttemplate.ekio.digital}
     pull_policy: build
     environment:
       - VITE_ENV=${VITE_ENV:-development}
@@ -35,5 +36,7 @@ services:
       - VITE_THEME_FAVICON=${VITE_THEME_FAVICON:-favicon.png}
       - VITE_WS_PAYMENT_URL=${VITE_WS_PAYMENT_URL:-wss://devwspayment.ekio.digital}
       - VITE_THEME_BLOBS_KEY=${VITE_THEME_BLOBS_KEY:-"?sp=r&st=2025-05-21T01:16:44Z&se=2026-05-21T09:16:44Z&spr=https&sv=2024-11-04&sr=c&sig=0o75S62Z761Xs2J5GX5XaVRwz%2BlqaGD3trx2uaKZzYw%3D"}
+      - VITE_URL_API_CONVERT_TEMPLATE=${VITE_URL_API_CONVERT_TEMPLATE:-https://devapiconverttemplate.ekio.digital}
     ports:
       - "8101:80"
+    network_mode: "bridge"
