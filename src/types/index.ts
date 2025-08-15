@@ -7,7 +7,38 @@
 //   price: number;
 // }
 
-export interface Product {
+// export interface Product {
+//   idSeguro: number;
+//   idSegurado: number;
+//   idOperacao: number;
+//   idProduto: number;
+//   nmProduto: string;
+//   cdStatusSeguro: number;
+//   chStatusSeguro: number;
+//   dsStatusSeguro: string;
+//   dtEmissao: string;
+//   vlParcela: number;
+//   vlPremio: number;
+//   tpAdesao: number;
+//   chAdesao: number;
+//   dsAdesao: string;
+//   tpSegurado: number;
+//   chSegurado: number;
+//   dsSegurado: string;
+//   idUsuario: number;
+//   idExterno: number;
+//   dtCadastro: string;
+// }
+
+// export interface UserData {
+//   name: string;
+//   cpf: string;
+//   age: number;
+//   email?: string;
+//   phone?: string;
+// }
+
+export interface UserDataAndProductData {
   idSeguro: number;
   idSegurado: number;
   idOperacao: number;
@@ -16,7 +47,12 @@ export interface Product {
   cdStatusSeguro: number;
   chStatusSeguro: number;
   dsStatusSeguro: string;
+  nrProposta: string;
+  nrCertificado: string;
+  nrBilhete: string;
   dtEmissao: string;
+  dtVigenciaInicio: string;
+  dtVigenciaFinal: string;
   vlParcela: number;
   vlPremio: number;
   tpAdesao: number;
@@ -28,14 +64,11 @@ export interface Product {
   idUsuario: number;
   idExterno: number;
   dtCadastro: string;
-}
-
-export interface UserData {
-  name: string;
-  cpf: string;
-  age: number;
-  email?: string;
-  phone?: string;
+  dtAlteracao: string;
+  nmSegurado: string;
+  nrCpf: string;
+  nrTelefone: string;
+  dsEmail: string;
 }
 
 export type PayMethods = "pix" | "credit_card" | "debit_card" | "boleto" | "pix_qrcode" | null;
@@ -63,9 +96,7 @@ export interface PaymentInfo {
 }
 
 export interface URLParams {
-  policyId: string;
   idSeguro: string;
-  paymentCode: string;
 }
 
 export interface WebSocketMessage<T extends keyof WebSocketEvents = keyof WebSocketEvents> {
@@ -74,12 +105,10 @@ export interface WebSocketMessage<T extends keyof WebSocketEvents = keyof WebSoc
 }
 
 export interface GlobalState {
-  product: Product | null;
-  userData: UserData | null;
+  productAndUserData: UserDataAndProductData | null;
   wsRoomId: string | null;
   paymentMethod: PaymentMethod | null;
-  setProduct: (product: Product) => void;
-  setUserData: (userData: UserData) => void;
+  setProductAndUserData: (productAndUserData: UserDataAndProductData | null) => void;
   setWsRoomId: (roomId: string) => void;
   setPaymentMethod: (method: PaymentMethod | null) => void;
   reset: () => void;

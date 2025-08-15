@@ -22,7 +22,7 @@ const getPayMethod = (paymentMethod: PaymentMethod | null) => {
 }
 
 export const PaymentPage = () => {
-  const { product, paymentMethod, setPaymentMethod } = useGlobalStore();
+  const { productAndUserData, paymentMethod, setPaymentMethod } = useGlobalStore();
   const { sendMessage } = useWebSocket();
   const [payMethodSelected, setPayMethodSelected] = useState<PayMethods>(getPayMethod(paymentMethod));
   const [paymentFormValue, setPaymentFormValue] = useState<PaymentMethod | null>(null);
@@ -42,12 +42,15 @@ export const PaymentPage = () => {
   };
 
   const handleSelectPayMethod = (paymentMethod: PaymentMethod | null) => {
-    console.log(paymentMethod);
+    if(getPayMethod(paymentMethod) === null){
+      toast.error("Selecione um método de pagamento para continuar");
+      return;
+    }
     setPaymentMethod(paymentMethod);
     setPayMethodSelected(getPayMethod(paymentMethod));
   }
 
-  if (!product) {
+  if (!productAndUserData) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="card max-w-md w-full text-center">
@@ -63,20 +66,16 @@ export const PaymentPage = () => {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="h-full">
       <Container className="min-h-screen flex flex-col justify-center">
-      <button className='absolute top-0 right-0' onClick={()=>{
-        setPayMethodSelected(null);
-        setPaymentFormValue(null);
-      }}>clear</button>
           
           {/* Métodos de pagamento*/}
           {payMethodSelected === null && (
-            <PaymentMethods onMethodSelect={handleFormValueChange} formValue={paymentFormValue} />
+            <PaymentMethods onMethodSelect={handleFormValueChange} formValue={paymentFormValue} productAndUserData={productAndUserData} />
           )}
 
           {payMethodSelected === "pix" && (
-            <PixForm idSeguro={product.idSeguro.toString()} paymentConfig={paymentFormValue} onErrorBackFn={()=>setPayMethodSelected(null)}/>
+            <PixForm idSeguro={productAndUserData.idSeguro.toString()} paymentConfig={paymentFormValue} onErrorBackFn={()=>setPayMethodSelected(null)}/>
           )}
 
           {payMethodSelected !== null && payMethodSelected !== "pix" && (
@@ -98,8 +97,8 @@ export const PaymentPage = () => {
 
           {payMethodSelected === null && (
               <div className="sticky flex justify-between items-center gap-4">
-                <ProductAvatar product={product} horizontal/>
-                <Button onClick={()=>handleSelectPayMethod(paymentFormValue)}>
+                <ProductAvatar productAndUserData={productAndUserData} horizontal/>
+                <Button disabled={getPayMethod(paymentFormValue) === null} onClick={()=>handleSelectPayMethod(paymentFormValue)}>
                   <span>Prosseguir</span>
                 </Button>
               </div>

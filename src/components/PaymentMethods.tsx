@@ -1,17 +1,18 @@
-import { PaymentMethod } from '@/types';
+import { PaymentMethod, UserDataAndProductData } from '@/types';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/services/api';
 
 interface PaymentMethodsProps {
   onMethodSelect: (method: PaymentMethod) => void;
   formValue: PaymentMethod | null;
+  productAndUserData: UserDataAndProductData;
 }
 
-export const PaymentMethods = ({ onMethodSelect, formValue }: PaymentMethodsProps) => {
+export const PaymentMethods = ({ onMethodSelect, formValue, productAndUserData }: PaymentMethodsProps) => {
 
   const { data: methods, isLoading, error } = useQuery({
     queryKey: ['paymentMethods'],
-    queryFn: api.getPaymentMethods,
+    queryFn: () => api.getPaymentMethods(productAndUserData.idProduto.toString()),
   });
 
   const handleMethodSelect = (method: PaymentMethod) => {
@@ -50,9 +51,9 @@ export const PaymentMethods = ({ onMethodSelect, formValue }: PaymentMethodsProp
             <button
               key={method.idOperacaoMeioPagamento}
               onClick={() => handleMethodSelect(method)}
-              className={`w-full p-4 border rounded-lg text-left transition-colors bg-zinc-50 ${
+              className={`w-full p-4 border-2 rounded-lg text-left transition-colors bg-zinc-50 ${
                 formValue?.chPagamento === method.chPagamento
-                  ? 'border-primary-500 bg-primary-50'
+                  ? 'border-[var(--cor-principal)] bg-[var(--cor-principal)]/10'
                   : 'border-zinc-200 hover:border-zinc-300'
               }`}
             >
@@ -64,7 +65,7 @@ export const PaymentMethods = ({ onMethodSelect, formValue }: PaymentMethodsProp
                   </p>
                 </div>
                 {formValue?.chPagamento === method.chPagamento && (
-                  <div className="w-5 h-5 bg-primary-500 rounded-full flex items-center justify-center">
+                  <div className="w-5 h-5 bg-[var(--cor-principal)] rounded-full flex items-center justify-center">
                     <div className="w-2 h-2 bg-white rounded-full"></div>
                   </div>
                 )}
