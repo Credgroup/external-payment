@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 
 // Remove espaços e quebras de linha
 function normalizePixCode(pixCode: string): string {
-  return pixCode.replace(/\s+/g, "");
+  return pixCode.trim();
 }
 
 // Checa se parece um código PIX (heurística simples)
@@ -33,6 +33,9 @@ export async function generatePixQrCode(
 
     // 3. Seta como QR Code
     setQrCode(normalized);
+    if(import.meta.env.VITE_ENV !== "production") {
+      console.log(normalized)
+    }
   } catch (err) {
     setError("Erro ao gerar QR Code.");
   } finally {
@@ -46,8 +49,12 @@ export function usePixQrCode() {
   const [qrCode, setQrCode] = useState<string | null>(null);
 
   const generate = useCallback(
-    (pixCode: string) =>
-      generatePixQrCode(pixCode, setLoading, setError, setQrCode),
+    (pixCode: string) => {
+      if(import.meta.env.VITE_ENV !== "production") {
+        console.log(pixCode)
+      }
+      generatePixQrCode(pixCode, setLoading, setError, setQrCode)
+    },
     []
   );
 
