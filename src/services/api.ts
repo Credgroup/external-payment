@@ -16,7 +16,7 @@ export interface DadosPagamento {
   nrParcela: number;
   valorParcela: number;
   arquivoExterno: string;
-  pixCopiaCola: string;
+  pixCopiaCola?: string;
 }
 
 type GeneratePaymentProps = {

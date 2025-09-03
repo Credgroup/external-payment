@@ -38,6 +38,7 @@ export const PixForm = ({ idSeguro, paymentConfig, onErrorBackFn }: PixFormProps
     if(isSuccess){
       setPaymentInfo(data);
       generate(data.dadosPagamento?.pixCopiaCola!);
+      localStorage.setItem("wPay", String(data.dadosPagamento?.valorParcela))
     }
   }, [isSuccess, data])
 
@@ -99,11 +100,11 @@ export const PixForm = ({ idSeguro, paymentConfig, onErrorBackFn }: PixFormProps
                     Pagamento PIX gerado com sucesso
                   </CardTitle>
                   {
-                      productAndUserData?.vlPremio && (
+                      !isLoading && data && data.dadosPagamento?.valorParcela && (
                         <CardDescription className='text-center'>
-                          Valor: <span className="font-bold text-primary-600">{formatCurrency(productAndUserData.vlPremio)}</span>
+                          Valor: <span className="font-bold text-primary-600">{formatCurrency(data.dadosPagamento?.valorParcela)}</span>
                           <br />
-                          Número da proposta: <span className="font-bold text-primary-600">{productAndUserData.nrProposta}</span>
+                          Número da proposta: <span className="font-bold text-primary-600">{data.dadosPagamento?.nrProposta}</span>
                         </CardDescription>
                       )
                   }

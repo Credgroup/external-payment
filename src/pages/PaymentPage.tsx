@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 import CreditCardForm from '@/components/CreditCardForm';
 import ProductResumeCard from '@/components/ProductResumeCard';
 import { useNavigate } from 'react-router-dom';
-import { api } from '@/services/api';
+import { api, PagamentoResponseSuccess } from '@/services/api';
 
 const getPayMethod = (paymentMethod: PaymentMethod | null) => {
   if(paymentMethod?.chPagamento === "1"){
@@ -87,12 +87,12 @@ export const PaymentPage = () => {
         
         console.log(res);
 
-        if(res.status !== 200){
+        if(!res.sucesso){
           const msg = res.data.mensagem ?? ""
           throw new Error("Aconteceu algum problema na hora de efetuar o pagamento. \n" + msg)
         }
 
-        return data;
+        return res;
         
       } catch (error) {
         console.log(error)
@@ -100,8 +100,10 @@ export const PaymentPage = () => {
       }
 
     },
-    onSuccess: (data: any) => {
+    onSuccess: (data: Partial<PagamentoResponseSuccess>) => {
       console.log("onSuccess function", data);
+
+      localStorage.setItem("wPay", String(data.dadosPagamento?.valorParcela))
 
       sendMessage("PAYMENT_SUCCESS", {
         transactionId: "",

@@ -7,25 +7,30 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader } from './ui/card';
 import { Button } from './ui/button';
 import ProductAvatar from './ProductAvatar';
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { api } from '@/services/api';
 import { format } from 'date-fns';
 
 export const PaymentSuccess = () => {
   const { productAndUserData, setProductAndUserData } = useGlobalStore();
-  const buttonDowloadBilheteRef = useRef<HTMLButtonElement | null>(null)
+  const [buttonDisabled, setButtonDisabled] = useState(false)
 
-  const { mutate: downloadTicketMutation, isPending } = useMutation({
+  const wPay = localStorage.getItem("wPay")
+
+  const { mutate: downloadTicketMutation } = useMutation({
     mutationKey: ['downloadTicket'],
     mutationFn: async () => {
+      setButtonDisabled(true)
       if(!productAndUserData?.idSeguro || !productAndUserData?.idProduto){
-        toast.error('Erro ao gerar bilhete, idSeguro ou idProduto não encontrado');
-        return;
+        throw new Error('Erro ao gerar bilhete, idSeguro ou idProduto não encontrado');
       }
       // Simulação de download do comprovante
-      await downloadTicket({ idSeguro: productAndUserData?.idSeguro.toString(), idProduct: productAndUserData?.idProduto.toString() })
+      const res = await downloadTicket({ idSeguro: productAndUserData?.idSeguro.toString(), idProduct: productAndUserData?.idProduto.toString() })
+      setButtonDisabled(false)
+      return res
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log(data)
       toast.success('Bilhete gerado com sucesso');
     },
     onError: () => {
@@ -34,7 +39,7 @@ export const PaymentSuccess = () => {
   })
 
   const { data: productAndUserDataUpdated, isLoading: userLoading, isError, error, isSuccess} = useQuery({
-    queryKey: ["updateProductAndUserData"],
+    queryKey: ["updateProductAndUserData", productAndUserData],
     queryFn: () => api.getUserDataAndProductData(productAndUserData!.idSeguro.toString()),
     enabled: !!productAndUserData,
     retry: false,
@@ -59,9 +64,9 @@ export const PaymentSuccess = () => {
 
   useEffect(()=>{
     const alreadyDownload = localStorage.getItem("download")
-    if(buttonDowloadBilheteRef.current && !alreadyDownload){
+    if(!alreadyDownload){
+      downloadTicketMutation()
       localStorage.setItem("download", "true")
-      buttonDowloadBilheteRef.current.click()
     }
   }, [])
 
@@ -90,14 +95,18 @@ export const PaymentSuccess = () => {
           {/* Detalhes do produto */}
           <div className="bg-gray-50 rounded-lg p-4 mb-6">
             <ProductAvatar horizontal productAndUserData={productAndUserData} className="mb-3" />
-            <div className="border-t pt-3">
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Valor pago:</span>
-                <span className="font-bold text-[var(--cor-principal)] text-lg">
-                  {formatCurrency(productAndUserData.vlPremio)}
-                </span>
-              </div>
-            </div>
+            {
+              wPay && (
+                <div className="border-t pt-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Valor pago:</span>
+                    <span className="font-bold text-[var(--cor-principal)] text-lg">
+                      {formatCurrency(parseInt(wPay))}
+                    </span>
+                  </div>
+                </div>
+              )
+            }
           </div>
 
           {/* Mensagem de agradecimento */}
@@ -115,7 +124,7 @@ export const PaymentSuccess = () => {
                 Bilhete de Pagamento
               </h4>
               <div className="text-sm text-primary-800 space-y-1">
-                <p>Número: {productAndUserDataUpdated.nrBilhete}</p>
+                <p>Número: {productAndUserDataUpdated.nrBilhete ?? "--"}</p>
                 <p>Data: {format(new Date(productAndUserDataUpdated.dtEmissao), 'dd/MM/yyyy')}</p>
               </div>
             </div>
@@ -131,10 +140,9 @@ export const PaymentSuccess = () => {
             <Button
               onClick={() => downloadTicketMutation()}
               className="w-full"
-              ref={buttonDowloadBilheteRef}
-              disabled={isPending}
+              disabled={buttonDisabled}
             >
-              {isPending ? (
+              {buttonDisabled ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <>

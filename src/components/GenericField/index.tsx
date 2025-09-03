@@ -36,7 +36,7 @@ export const formatOptions = (options: string) => {
     };
 
 // Função para formatar data
-export const formatDate = (value: string) => {
+export const formatDate = (value: string): string => {
     const v = value.replace(/\D/g, '');
     return v.replace(/(\d{2})(\d{2})(\d{4})/, '$1/$2/$3');
 };
@@ -60,8 +60,6 @@ export const removeMask = (value: string, maskType?: string) => {
             return removeCPFMask(value);
         case 'cartao_credito':
             return removeCardNumberMask(value);
-        case 'card_data':
-            return removeCardDateMask(value);
         default:
             return value;
     }
@@ -76,11 +74,6 @@ export const removeMask = (value: string, maskType?: string) => {
             return `${month}/${year}`;
         }
         return v;
-    };
-
-    // Função para remover máscara da data do cartão
-    const removeCardDateMask = (value: string) => {
-        return value.replace(/\D/g, '');
     };
 
 // Função para formatar número do cartão
@@ -110,7 +103,7 @@ export const applyMask = (value: string, maskType?: string) => {
             return formatCPF(value);
         case 'data':
             return formatDate(value);
-        case 'card_data':
+        case 'card_date':
             return formatCardDate(value);
         case 'cartao_credito':
             return formatCardNumber(value);

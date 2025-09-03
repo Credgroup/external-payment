@@ -7,6 +7,7 @@ import { useMemo, useState } from "react";
 import { Card, CardContent } from "./ui/card";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { PagamentoResponseSuccess } from "@/services/api";
 
 type CreditCardFormProps = {
     idSeguro: string;
@@ -148,9 +149,9 @@ export default function CreditCardForm({ idSeguro, paymentConfig, onErrorBackFn,
         mutationFn: () => useMutateFns.onSubmit({
             paymentConfig, 
             idSeguro, 
-            cardData: fieldsWithValues // Enviar o array com os campos e valores
+            cardData: fieldsWithValues
         }),
-        onSuccess: (data: any) => useMutateFns.onSuccess(data),
+        onSuccess: (data: Partial<PagamentoResponseSuccess>) => useMutateFns.onSuccess(data),
         onError: (error: any) => {
             setClickedContinue(false);
             useMutateFns.onError(error);
