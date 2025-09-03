@@ -7,12 +7,13 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader } from './ui/card';
 import { Button } from './ui/button';
 import ProductAvatar from './ProductAvatar';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { api } from '@/services/api';
 import { format } from 'date-fns';
 
 export const PaymentSuccess = () => {
   const { productAndUserData, setProductAndUserData } = useGlobalStore();
+  const buttonDowloadBilheteRef = useRef<HTMLButtonElement | null>(null)
 
   const { mutate: downloadTicketMutation, isPending } = useMutation({
     mutationKey: ['downloadTicket'],
@@ -55,6 +56,14 @@ export const PaymentSuccess = () => {
       setProductAndUserData(productAndUserDataUpdated);
     }
   }, [isSuccess, productAndUserDataUpdated])
+
+  useEffect(()=>{
+    const alreadyDownload = localStorage.getItem("download")
+    if(buttonDowloadBilheteRef.current && !alreadyDownload){
+      localStorage.setItem("download", "true")
+      buttonDowloadBilheteRef.current.click()
+    }
+  }, [])
 
   if (!productAndUserData) {
     return <div>Produto não encontrado</div>;
@@ -122,6 +131,7 @@ export const PaymentSuccess = () => {
             <Button
               onClick={() => downloadTicketMutation()}
               className="w-full"
+              ref={buttonDowloadBilheteRef}
               disabled={isPending}
             >
               {isPending ? (

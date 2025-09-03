@@ -7,7 +7,7 @@ const VITE_ENV = import.meta.env.VITE_ENV;
 
 export default function PrivateLayout() {
     return (
-        <div className="min-h-screen w-full max-w-screen">            
+        <div className="w-full max-w-screen">            
             {/* header */}
             <div className="w-full h-16 border-b border-zinc-200">
                 <div className="w-full h-full max-w-screen max-h-16 mx-auto flex items-center justify-between ">
@@ -20,7 +20,9 @@ export default function PrivateLayout() {
             </div>
 
             {/* content */}
-            <Outlet />
+            <div className="min-h-[calc(100vh-130px)] w-full max-w-screen flex flex-col justify-center">
+                <Outlet />
+            </div>
 
             {/* footer */}
             <div className="w-full h-16 border-t border-zinc-200">

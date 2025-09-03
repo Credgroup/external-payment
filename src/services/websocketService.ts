@@ -108,6 +108,8 @@ class WebSocketService {
           }
         };
       } catch (error) {
+        console.log("===================")
+        console.log(error)
         this.connectionPromise = null; // Limpa a promise
         reject(error);
       }

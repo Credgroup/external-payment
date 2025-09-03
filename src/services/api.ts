@@ -1,3 +1,4 @@
+import { encrypt } from '@/hooks/useCrypt';
 import { gerarTokenFixo } from '@/lib/utils';
 import { PaymentMethod, UserDataAndProductData } from '@/types';
 import axios from 'axios';
@@ -18,9 +19,11 @@ export interface DadosPagamento {
   pixCopiaCola: string;
 }
 
-type GeneratePixPaymentProps = {
+type GeneratePaymentProps = {
   config: PaymentMethod;
   idSeguro: string;
+  cardData?: any;
+  paramsType?: "pix" | "card" | "boleto";
 };
 
 export const api = {
@@ -47,14 +50,26 @@ export const api = {
   },
 
   // Gerar pagamento PIX
-  generatePixPayment: async ({config, idSeguro}: Readonly<GeneratePixPaymentProps>): Promise<Partial<PagamentoResponseSuccess>> => {
-    console.log('generatePixPayment', config, idSeguro);
+  generatePayment: async ({config, idSeguro, paramsType = "pix", cardData}: Readonly<GeneratePaymentProps>): Promise<Partial<PagamentoResponseSuccess>> => {
     if(!config || !idSeguro) {
       throw new Error('Configuração de pagamento ou ID do produto não informados');
     }
     
     try {
-      const data = { idOperacaoMeioPagamento: config.idOperacaoMeioPagamento, idSeguro: parseInt(idSeguro) }
+      let data = {}
+      if(paramsType === "pix"){
+        data = { idOperacaoMeioPagamento: config.idOperacaoMeioPagamento, idSeguro: parseInt(idSeguro) }
+      }else if(paramsType === "card"){
+        const params = { idOperacaoMeioPagamento: config.idOperacaoMeioPagamento, idSeguro: parseInt(idSeguro), Cartao: cardData }
+        data = {
+          dados: encrypt(JSON.stringify(params))
+        }
+      }else if(paramsType === "boleto"){
+        data = {}
+      }
+
+      console.log("data", data)
+      
       const res: any = await axios.post(
           `${import.meta.env.VITE_URL_DOTCORE}/api/crm/payment/external/generate`,
           data,
@@ -70,10 +85,12 @@ export const api = {
         throw new Error(res.data.mensagem);
       }
   
+      localStorage.removeItem("download")
       return res.data as Partial<PagamentoResponseSuccess>;
-    } catch (error) {
+    } catch (error: any) {
       console.log(error)
-      throw new Error('Erro ao gerar pagamento PIX');
+      const msg = error.response.data.mensagem ?? ""
+      throw new Error('Erro ao gerar pagamento PIX \n' + msg);
     }
   },
 

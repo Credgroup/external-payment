@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { GlobalState, UserDataAndProductData } from '@/types';
+import { decrypt, encrypt } from '@/hooks/useCrypt';
 
 export const useGlobalStore = create<GlobalState>((set) => ({
   productAndUserData: getProductAndUserDataFromLocalStorage(),
@@ -23,14 +24,14 @@ export const useGlobalStore = create<GlobalState>((set) => ({
 function getProductAndUserDataFromLocalStorage(){
   const productAndUserData = localStorage.getItem('cDfAppTIon');
   if(productAndUserData){
-    return JSON.parse(productAndUserData);
+    return JSON.parse(decrypt(productAndUserData));
   }
   return null;
 }
 
 function setProductAndUserDataToLocalStorage(productAndUserData: UserDataAndProductData | null){
   if(productAndUserData){
-    localStorage.setItem('cDfAppTIon', JSON.stringify(productAndUserData));
+    localStorage.setItem('cDfAppTIon', encrypt(JSON.stringify(productAndUserData)));
   }else{
     localStorage.removeItem('cDfAppTIon');
   }
