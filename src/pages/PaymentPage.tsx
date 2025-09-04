@@ -14,6 +14,7 @@ import CreditCardForm from '@/components/CreditCardForm';
 import ProductResumeCard from '@/components/ProductResumeCard';
 import { useNavigate } from 'react-router-dom';
 import { api, PagamentoResponseSuccess } from '@/services/api';
+import { encrypt } from '@/hooks/useCrypt';
 
 const getPayMethod = (paymentMethod: PaymentMethod | null) => {
   if(paymentMethod?.chPagamento === "1"){
@@ -103,7 +104,7 @@ export const PaymentPage = () => {
     onSuccess: (data: Partial<PagamentoResponseSuccess>) => {
       console.log("onSuccess function", data);
 
-      localStorage.setItem("wPay", String(data.dadosPagamento?.valorParcela))
+      localStorage.setItem("wPay", encrypt(JSON.stringify(data.dadosPagamento?.valorParcela)))
 
       sendMessage("PAYMENT_SUCCESS", {
         transactionId: "",

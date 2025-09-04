@@ -10,12 +10,14 @@ import ProductAvatar from './ProductAvatar';
 import { useEffect, useState } from 'react';
 import { api } from '@/services/api';
 import { format } from 'date-fns';
+import { decrypt } from '@/hooks/useCrypt';
 
 export const PaymentSuccess = () => {
   const { productAndUserData, setProductAndUserData } = useGlobalStore();
   const [buttonDisabled, setButtonDisabled] = useState(false)
 
   const wPay = localStorage.getItem("wPay")
+  const valuePaied = wPay ? parseFloat(decrypt(wPay)) : 0;
 
   const { mutate: downloadTicketMutation } = useMutation({
     mutationKey: ['downloadTicket'],
@@ -93,15 +95,15 @@ export const PaymentSuccess = () => {
           </div>
 
           {/* Detalhes do produto */}
-          <div className="bg-gray-50 rounded-lg p-4 mb-6">
-            <ProductAvatar horizontal productAndUserData={productAndUserData} className="mb-3" />
+          <div className="bg-gray-50 rounded-lg p-4 mb-6 flex flex-col justify-center">
+            <ProductAvatar horizontal productAndUserData={productAndUserData} className={!!valuePaied ? "mb-3" : ""} />
             {
-              wPay && (
+              !!valuePaied && (
                 <div className="border-t pt-3">
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">Valor pago:</span>
                     <span className="font-bold text-[var(--cor-principal)] text-lg">
-                      {formatCurrency(parseInt(wPay))}
+                      {formatCurrency(valuePaied)}
                     </span>
                   </div>
                 </div>
@@ -118,22 +120,30 @@ export const PaymentSuccess = () => {
           </div>
 
           {/* Bilhete de pagamento */}
-          {!userLoading ? (
-            <div className="bg-primary-50 border border-primary-200 rounded-lg p-4 mb-6">
-              <h4 className="font-semibold text-primary-900 mb-2">
-                Bilhete de Pagamento
-              </h4>
-              <div className="text-sm text-primary-800 space-y-1">
-                <p>Número: {productAndUserDataUpdated.nrBilhete ?? "--"}</p>
-                <p>Data: {format(new Date(productAndUserDataUpdated.dtEmissao), 'dd/MM/yyyy')}</p>
-              </div>
+          <div className="bg-primary-50 border border-primary-200 rounded-lg p-4 mb-6">
+            <h4 className="font-semibold text-primary-900 mb-2">
+              Bilhete de Pagamento
+            </h4>
+            <div className="text-sm text-primary-800 space-y-1">
+              {
+                !userLoading && (
+                  <>
+                    <p>Número: {productAndUserDataUpdated?.nrBilhete ?? "--"}</p>
+                    <p>Data: {format(new Date(productAndUserDataUpdated?.dtEmissao), 'dd/MM/yyyy')}</p>
+                  </>
+                )
+              }
+
+              {
+                userLoading && (
+                  <div className="flex items-center justify-start gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Buscando dados...</span>
+                  </div>
+                )
+              }
             </div>
-          ) : (
-            <div className="flex items-center justify-center">
-              <Loader2 className="w-4 h-4 animate-spin" />
-              <span>Buscando bilhete...</span>
-            </div>
-          )}
+          </div>
 
           {/* Botões de ação */}
           <div className="space-y-3">

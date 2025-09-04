@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { usePixQrCode } from '@/hooks/useGenerateQrCodePix';
 import QRCode from 'react-qr-code';
+import { encrypt } from '@/hooks/useCrypt';
 
 interface PixFormProps {
   idSeguro: string;
@@ -38,7 +39,7 @@ export const PixForm = ({ idSeguro, paymentConfig, onErrorBackFn }: PixFormProps
     if(isSuccess){
       setPaymentInfo(data);
       generate(data.dadosPagamento?.pixCopiaCola!);
-      localStorage.setItem("wPay", String(data.dadosPagamento?.valorParcela))
+      localStorage.setItem("wPay", encrypt(JSON.stringify(data.dadosPagamento?.valorParcela)))
     }
   }, [isSuccess, data])
 
