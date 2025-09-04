@@ -7,24 +7,32 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader } from './ui/card';
 import { Button } from './ui/button';
 import ProductAvatar from './ProductAvatar';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { api } from '@/services/api';
 import { format } from 'date-fns';
+import { decrypt } from '@/hooks/useCrypt';
 
 export const PaymentSuccess = () => {
   const { productAndUserData, setProductAndUserData } = useGlobalStore();
+  const [buttonDisabled, setButtonDisabled] = useState(false)
 
-  const { mutate: downloadTicketMutation, isPending } = useMutation({
+  const wPay = localStorage.getItem("wPay")
+  const valuePaied = wPay ? parseFloat(decrypt(wPay)) : 0;
+
+  const { mutate: downloadTicketMutation } = useMutation({
     mutationKey: ['downloadTicket'],
     mutationFn: async () => {
+      setButtonDisabled(true)
       if(!productAndUserData?.idSeguro || !productAndUserData?.idProduto){
-        toast.error('Erro ao gerar bilhete, idSeguro ou idProduto não encontrado');
-        return;
+        throw new Error('Erro ao gerar bilhete, idSeguro ou idProduto não encontrado');
       }
       // Simulação de download do comprovante
-      await downloadTicket({ idSeguro: productAndUserData?.idSeguro.toString(), idProduct: productAndUserData?.idProduto.toString() })
+      const res = await downloadTicket({ idSeguro: productAndUserData?.idSeguro.toString(), idProduct: productAndUserData?.idProduto.toString() })
+      setButtonDisabled(false)
+      return res
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log(data)
       toast.success('Bilhete gerado com sucesso');
     },
     onError: () => {
@@ -33,7 +41,7 @@ export const PaymentSuccess = () => {
   })
 
   const { data: productAndUserDataUpdated, isLoading: userLoading, isError, error, isSuccess} = useQuery({
-    queryKey: ["updateProductAndUserData"],
+    queryKey: ["updateProductAndUserData", productAndUserData],
     queryFn: () => api.getUserDataAndProductData(productAndUserData!.idSeguro.toString()),
     enabled: !!productAndUserData,
     retry: false,
@@ -55,6 +63,14 @@ export const PaymentSuccess = () => {
       setProductAndUserData(productAndUserDataUpdated);
     }
   }, [isSuccess, productAndUserDataUpdated])
+
+  useEffect(()=>{
+    const alreadyDownload = localStorage.getItem("download")
+    if(!alreadyDownload){
+      downloadTicketMutation()
+      localStorage.setItem("download", "true")
+    }
+  }, [])
 
   if (!productAndUserData) {
     return <div>Produto não encontrado</div>;
@@ -79,16 +95,20 @@ export const PaymentSuccess = () => {
           </div>
 
           {/* Detalhes do produto */}
-          <div className="bg-gray-50 rounded-lg p-4 mb-6">
-            <ProductAvatar horizontal productAndUserData={productAndUserData} className="mb-3" />
-            <div className="border-t pt-3">
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Valor pago:</span>
-                <span className="font-bold text-[var(--cor-principal)] text-lg">
-                  {formatCurrency(productAndUserData.vlPremio)}
-                </span>
-              </div>
-            </div>
+          <div className="bg-gray-50 rounded-lg p-4 mb-6 flex flex-col justify-center">
+            <ProductAvatar horizontal productAndUserData={productAndUserData} className={!!valuePaied ? "mb-3" : ""} />
+            {
+              !!valuePaied && (
+                <div className="border-t pt-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Valor pago:</span>
+                    <span className="font-bold text-[var(--cor-principal)] text-lg">
+                      {formatCurrency(valuePaied)}
+                    </span>
+                  </div>
+                </div>
+              )
+            }
           </div>
 
           {/* Mensagem de agradecimento */}
@@ -100,31 +120,39 @@ export const PaymentSuccess = () => {
           </div>
 
           {/* Bilhete de pagamento */}
-          {!userLoading ? (
-            <div className="bg-primary-50 border border-primary-200 rounded-lg p-4 mb-6">
-              <h4 className="font-semibold text-primary-900 mb-2">
-                Bilhete de Pagamento
-              </h4>
-              <div className="text-sm text-primary-800 space-y-1">
-                <p>Número: {productAndUserDataUpdated.nrBilhete}</p>
-                <p>Data: {format(new Date(productAndUserDataUpdated.dtEmissao), 'dd/MM/yyyy')}</p>
-              </div>
+          <div className="bg-primary-50 border border-primary-200 rounded-lg p-4 mb-6">
+            <h4 className="font-semibold text-primary-900 mb-2">
+              Bilhete de Pagamento
+            </h4>
+            <div className="text-sm text-primary-800 space-y-1">
+              {
+                !userLoading && (
+                  <>
+                    <p>Número: {productAndUserDataUpdated?.nrBilhete ?? "--"}</p>
+                    <p>Data: {format(new Date(productAndUserDataUpdated?.dtEmissao), 'dd/MM/yyyy')}</p>
+                  </>
+                )
+              }
+
+              {
+                userLoading && (
+                  <div className="flex items-center justify-start gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Buscando dados...</span>
+                  </div>
+                )
+              }
             </div>
-          ) : (
-            <div className="flex items-center justify-center">
-              <Loader2 className="w-4 h-4 animate-spin" />
-              <span>Buscando bilhete...</span>
-            </div>
-          )}
+          </div>
 
           {/* Botões de ação */}
           <div className="space-y-3">
             <Button
               onClick={() => downloadTicketMutation()}
               className="w-full"
-              disabled={isPending}
+              disabled={buttonDisabled}
             >
-              {isPending ? (
+              {buttonDisabled ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <>
