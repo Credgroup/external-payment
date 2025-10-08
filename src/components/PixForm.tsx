@@ -46,7 +46,7 @@ export const PixForm = ({ idSeguro, paymentConfig, onErrorBackFn }: PixFormProps
   useEffect(()=>{
     if(isError && error && acceptGeneratePix){
       console.log(error);
-      toast.error('Erro ao gerar pagamento PIX');
+      toast.error('Erro ao gerar pagamento');
     }
   }, [isError, error])
 

@@ -90,7 +90,7 @@ export const api = {
     } catch (error: any) {
       console.log(error)
       const msg = error.response.data.mensagem ?? ""
-      throw new Error('Erro ao gerar pagamento PIX \n' + msg);
+      throw new Error('Erro ao gerar pagamento \n' + msg);
     }
   },
 
