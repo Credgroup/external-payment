@@ -82,6 +82,7 @@ export const PaymentPage = () => {
         const res: any = await api.generatePayment({
           config: data.paymentConfig,
           idSeguro: productAndUserData!.idSeguro.toString(),
+          idProduto: productAndUserData!.idProduto.toString(),
           paramsType: "card",
           cardData: formatCardData
         });
