@@ -22,19 +22,20 @@ export interface DadosPagamento {
 type GeneratePaymentProps = {
   config: PaymentMethod;
   idSeguro: string;
+  idProduto: string;
   cardData?: any;
   paramsType?: "pix" | "card" | "boleto";
 };
 
 export const api = {
   // Buscar métodos de pagamento disponíveis
-  getPaymentMethods: async (idSeguro?: string | null): Promise<PaymentMethod[]> => {
+  getPaymentMethods: async (idSeguro?: string | null, idProduto?: string | null): Promise<PaymentMethod[]> => {
 
     if(!idSeguro) {
       throw new Error('ID do seguro não informado');
     }
 
-    const res: any = await axios.get(`${import.meta.env.VITE_URL_DOTCORE}/api/crm/payment/external/options/product/${idSeguro}`, {
+    const res: any = await axios.get(`${import.meta.env.VITE_URL_DOTCORE}/api/crm/payment/external/options/product/${idProduto}/${idSeguro}`, {
       headers: {
         "Content-Type": "application/json",
         "X-Token": `${gerarTokenFixo()}`
