@@ -3,7 +3,7 @@ import { UserDataAndProductData } from "@/types";
 import { LucideBox } from "lucide-react";
 
 export default function ProductAvatar({productAndUserData, horizontal, className}: {productAndUserData: UserDataAndProductData, horizontal?: boolean, className?: string}) {
-   const hasImage = false
+   const hasImage = !!productAndUserData.dsLogo
 
     if(horizontal){
         return (
@@ -11,7 +11,7 @@ export default function ProductAvatar({productAndUserData, horizontal, className
                 {
                     hasImage ? (
                         <div className="w-16 h-16 rounded-full flex items-center justify-center overflow-hidden bg-zinc-200">
-                            <img src="asdf" alt={productAndUserData.nmProduto} className="w-full h-full object-cover" />
+                            <img src= {productAndUserData?.dsLogo+import.meta.env.VITE_THEME_BLOBS_KEY} alt={productAndUserData.nmProduto} className="w-full h-full object-cover" />
                         </div>
                     ) : (
                         <div className="w-16 h-16 rounded-full flex items-center justify-center overflow-hidden bg-[var(--paleta-branco-400)]">
@@ -31,7 +31,7 @@ export default function ProductAvatar({productAndUserData, horizontal, className
                 {
                     hasImage ? (
                         <div className="w-32 h-32 rounded-full flex items-center justify-center overflow-hidden bg-zinc-200">
-                            <img src={productAndUserData.dsLogo} alt={productAndUserData.nmProduto} className="w-full h-full object-cover" />
+                            <img src={productAndUserData?.dsLogo+import.meta.env.VITE_THEME_BLOBS_KEY} alt={productAndUserData.nmProduto} className="w-full h-full object-cover" />
                         </div>
                     ) : (
                         <div className="w-32 h-32 rounded-full flex items-center justify-center overflow-hidden bg-[var(--paleta-branco-400)] ">

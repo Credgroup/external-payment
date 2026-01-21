@@ -15,7 +15,7 @@ export default function ProductResumeCard({productDetails}: ProductResumeCardPro
         <Card className="w-full p-6 flex flex-col gap-4 min-w-72">
         <div className="flex gap-3 items-start mb-2">
           <div className="min-w-16 min-h-16 max-w-16 max-h-16 aspect-square bg-muted rounded-md flex items-center justify-center overflow-hidden border">
-            <img src={`${productDetails?.dsLogo}?sp=r&st=2025-05-21T01:16:44Z&se=2026-05-21T09:16:44Z&spr=https&sv=2024-11-04&sr=c&sig=0o75S62Z761Xs2J5GX5XaVRwz%2BlqaGD3trx2uaKZzYw%3D`} className="object-cover w-full h-full aspect-square" alt={productDetails?.nmProduto ?? ""} />
+            <img src={productDetails?.dsLogo} className="object-cover w-full h-full aspect-square" alt={productDetails?.nmProduto ?? ""} />
           </div>
           <div>
             <div className="font-semibold text-lg mb-1">{productDetails?.nmProduto}</div>
