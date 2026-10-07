@@ -82,6 +82,7 @@ export const PaymentPage = () => {
         const res: any = await api.generatePayment({
           config: data.paymentConfig,
           idSeguro: productAndUserData!.idSeguro.toString(),
+          idProduto: productAndUserData!.idProduto.toString(),
           paramsType: "card",
           cardData: formatCardData
         });
@@ -182,7 +183,7 @@ export const PaymentPage = () => {
                     dsProduto: "Sem descrição",
                     total: productAndUserData.vlPremio.toString(),
                     subtotal: productAndUserData.vlPremio.toString(),
-                    dsLogo: "none",
+                    dsLogo: productAndUserData?.dsLogo+import.meta.env.VITE_THEME_BLOBS_KEY,
                   }} />
                 </PaymentFormLayout.Aside>
               </PaymentFormLayout.Root>

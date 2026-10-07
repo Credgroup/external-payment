@@ -27,8 +27,8 @@ export const PixForm = ({ idSeguro, paymentConfig, onErrorBackFn }: PixFormProps
 
   const { data, isLoading, isSuccess, isError, error} = useQuery({
     queryKey: ['generatePixCode', idSeguro],
-    queryFn: () => api.generatePayment({config: paymentConfig!, idSeguro}),
-    enabled: !!idSeguro && !!paymentConfig && acceptGeneratePix,
+    queryFn: () => api.generatePayment({config: paymentConfig!, idSeguro, idProduto: productAndUserData!.idProduto.toString()}),
+    enabled: !!idSeguro && !!paymentConfig && !!productAndUserData && acceptGeneratePix,
     retry: false,
     refetchOnWindowFocus: false,
     refetchOnMount: false,

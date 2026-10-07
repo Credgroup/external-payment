@@ -90,7 +90,7 @@ export default function LoadingPage(){
       <div className="bg-zinc-100 min-h-screen w-full max-w-screen flex items-center justify-center">
         <div className="text-center flex flex-col items-center gap-4">
           <LucideLoader2 className="text-[var(--cor-principal)] animate-spin" size={38} />
-          <p className="text-gray-600">Buscando seus dados muito bacanudos</p>
+          <p className="text-gray-600">Buscando seus dados</p>
         </div>
         <Toaster />
       </div>

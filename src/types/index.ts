@@ -69,6 +69,7 @@ export interface UserDataAndProductData {
   nrCpf: string;
   nrTelefone: string;
   dsEmail: string;
+  dsLogo: string;
 }
 
 export type PayMethods = "pix" | "credit_card" | "debit_card" | "boleto" | "pix_qrcode" | null;

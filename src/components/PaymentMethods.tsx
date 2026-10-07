@@ -12,7 +12,7 @@ export const PaymentMethods = ({ onMethodSelect, formValue, productAndUserData }
 
   const { data: methods, isLoading, error } = useQuery({
     queryKey: ['paymentMethods'],
-    queryFn: () => api.getPaymentMethods(productAndUserData.idProduto.toString()),
+    queryFn: () => api.getPaymentMethods(productAndUserData.idSeguro.toString(), productAndUserData.idProduto.toString()),
   });
 
   const handleMethodSelect = (method: PaymentMethod) => {
