@@ -73,34 +73,32 @@ export const PaymentPage = () => {
 
   const creditCardFormUseMutateFns = {
     onSubmit: async (data: any) => {
-
       try {
-        console.log(data)
-        const formatCardData = formatCardDataFn(data.cardData)
-        console.log(formatCardData)
-  
-        const res: any = await api.generatePayment({
-          config: data.paymentConfig,
-          idSeguro: productAndUserData!.idSeguro.toString(),
-          idProduto: productAndUserData!.idProduto.toString(),
-          paramsType: "card",
-          cardData: formatCardData
-        });
+        const formattedCard = formatCardDataFn(data.cardData);
+        console.log("Processando cartão (mock apresentação):", formattedCard);
         
-        console.log(res);
+        // Mock para apresentação: ativa o seguro no CRM
+        const resAtivar = await api.ativarSeguro(productAndUserData!.idSeguro.toString());
+        console.log("Resultado ativação seguro:", resAtivar);
 
-        if(!res.sucesso){
-          const msg = res.data.mensagem ?? ""
-          throw new Error("Aconteceu algum problema na hora de efetuar o pagamento. \n" + msg)
-        }
+        const mockResponse: Partial<PagamentoResponseSuccess> = {
+          sucesso: true,
+          mensagem: "Pagamento realizado e seguro ativado com sucesso",
+          dadosPagamento: {
+            codePagamentoExterno: `CARD-MOCK-${productAndUserData!.idSeguro}`,
+            nrProposta: productAndUserData?.nrProposta || productAndUserData!.idSeguro.toString(),
+            dtExpericao: new Date().toISOString(),
+            nrParcela: 1,
+            valorParcela: productAndUserData?.vlParcela || productAndUserData?.vlPremio || 0,
+            arquivoExterno: ""
+          }
+        };
 
-        return res;
-        
+        return mockResponse;
       } catch (error) {
-        console.log(error)
-        throw error
+        console.log(error);
+        throw error;
       }
-
     },
     onSuccess: (data: Partial<PagamentoResponseSuccess>) => {
       console.log("onSuccess function", data);

@@ -95,6 +95,43 @@ export const api = {
     }
   },
 
+  // Ativar seguro provisório (Mock para apresentação)
+  ativarSeguro: async (idSeguro: string | number): Promise<any> => {
+    try {
+      const url = `${import.meta.env.VITE_URL_DOTCORE}/api/crm/insurance/external/ativar/${idSeguro}`;
+      const res = await axios.post(
+        url,
+        {},
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "X-Token": `${gerarTokenFixo()}`
+          }
+        }
+      );
+      return res.data;
+    } catch (error: any) {
+      console.error("Erro ao ativar seguro provisório:", error);
+      try {
+        const fallbackUrl = `${import.meta.env.VITE_URL_DOTCORE}/external/ativar/${idSeguro}`;
+        const fallbackRes = await axios.post(
+          fallbackUrl,
+          {},
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "X-Token": `${gerarTokenFixo()}`
+            }
+          }
+        );
+        return fallbackRes.data;
+      } catch {
+        const msg = error?.response?.data?.message || error?.response?.data?.mensagem || "Erro ao ativar seguro";
+        throw new Error(msg);
+      }
+    }
+  },
+
   // Buscar dados do usuário (simulado)
   getUserDataAndProductData: async (idSeguro: string): Promise<any> => {
     console.log('getUserData', idSeguro);

@@ -15,11 +15,11 @@ import { encrypt } from '@/hooks/useCrypt';
 
 interface PixFormProps {
   idSeguro: string;
-  paymentConfig: PaymentMethod | null;
+  paymentConfig?: PaymentMethod | null;
   onErrorBackFn: () => void;
 }
 
-export const PixForm = ({ idSeguro, paymentConfig, onErrorBackFn }: PixFormProps) => {
+export const PixForm = ({ idSeguro, paymentConfig: _paymentConfig, onErrorBackFn }: PixFormProps) => {
   const { productAndUserData } = useGlobalStore();
   const [paymentInfo, setPaymentInfo] = useState<Partial<PagamentoResponseSuccess> | null>(null);
   const [acceptGeneratePix, setAcceptGeneratePix] = useState(false);
@@ -27,8 +27,29 @@ export const PixForm = ({ idSeguro, paymentConfig, onErrorBackFn }: PixFormProps
 
   const { data, isLoading, isSuccess, isError, error} = useQuery({
     queryKey: ['generatePixCode', idSeguro],
-    queryFn: () => api.generatePayment({config: paymentConfig!, idSeguro, idProduto: productAndUserData!.idProduto.toString()}),
-    enabled: !!idSeguro && !!paymentConfig && !!productAndUserData && acceptGeneratePix,
+    queryFn: async () => {
+      // Mock para apresentação: ativa o seguro no CRM e retorna QR code genérico
+      await api.ativarSeguro(idSeguro);
+
+      const genericPixCode = "00020126580014BR.GOV.BCB.PIX0136123e4567-e89b-12d3-a456-426614174000520400005303986540510.005802BR5913MOCK PAGAMENTO6008BRASILIA62070503***63041D3A";
+
+      const mockResponse: PagamentoResponseSuccess = {
+        sucesso: true,
+        mensagem: "PIX gerado e seguro ativado com sucesso",
+        dadosPagamento: {
+          codePagamentoExterno: `PIX-MOCK-${idSeguro}`,
+          nrProposta: productAndUserData?.nrProposta || idSeguro,
+          dtExpericao: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+          nrParcela: 1,
+          valorParcela: productAndUserData?.vlParcela || productAndUserData?.vlPremio || 0,
+          arquivoExterno: "",
+          pixCopiaCola: genericPixCode
+        }
+      };
+
+      return mockResponse;
+    },
+    enabled: !!idSeguro && !!productAndUserData && acceptGeneratePix,
     retry: false,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
@@ -36,10 +57,11 @@ export const PixForm = ({ idSeguro, paymentConfig, onErrorBackFn }: PixFormProps
   })
 
   useEffect(()=>{
-    if(isSuccess){
+    if(isSuccess && data){
       setPaymentInfo(data);
       generate(data.dadosPagamento?.pixCopiaCola!);
       localStorage.setItem("wPay", encrypt(JSON.stringify(data.dadosPagamento?.valorParcela)))
+      toast.success("Seguro ativado e QR Code PIX gerado!");
     }
   }, [isSuccess, data])
 

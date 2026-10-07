@@ -1,0 +1,23 @@
+:root {
+  /* Cores Principais Brasilseg (BB Seguros) */
+  --cor-principal: #003882;
+  --cor-secundaria: #FCDB00;
+  --cor-terciaria: #0066CC;
+
+  /* Paleta de Neutros / Escuros */
+  --paleta-preto-400: #1a202c;
+  --paleta-preto-300: #2d3748;
+  --paleta-preto-200: #4a5568;
+  --paleta-preto-100: #718096;
+
+  /* Paleta de Neutros / Claros */
+  --paleta-branco-100: #ffffff;
+  --paleta-branco-200: #f7fafc;
+  --paleta-branco-300: #edf2f7;
+  --paleta-branco-400: #e2e8f0;
+
+  /* Imagens / Logos */
+  --image-logo-extended: url("/themes/brasilseg/principal-logo.png");
+  --image-logo-principal: url("/themes/brasilseg/principal-logo.png");
+  --image-logo-compact: url("/themes/brasilseg/compact-logo.png");
+}

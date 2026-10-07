@@ -9,10 +9,10 @@ export default function PrivateLayout() {
     return (
         <div className="w-full max-w-screen">            
             {/* header */}
-            <div className="w-full h-16 border-b border-zinc-200">
-                <div className="w-full h-full max-w-screen max-h-16 mx-auto flex items-center justify-between ">
-                    <Container className="relative h-full max-h-16 flex items-center justify-between space-y-0">
-                        <div className="w-20 h-10 bg-[image:var(--image-logo-extended)] bg-contain bg-center bg-no-repeat">
+            <div className="w-full min-h-16 py-2 border-b border-zinc-200 bg-white shadow-xs">
+                <div className="w-full h-full max-w-screen mx-auto flex items-center justify-between">
+                    <Container className="relative h-full flex items-center justify-between space-y-0 py-1">
+                        <div className="w-48 sm:w-56 h-12 sm:h-14 bg-[image:var(--image-logo-extended)] bg-contain bg-left bg-no-repeat">
                         </div>
                         <ConnectionStatus />
                     </Container>
