@@ -181,7 +181,7 @@ export const PaymentPage = () => {
                     dsProduto: "Sem descrição",
                     total: productAndUserData.vlPremio.toString(),
                     subtotal: productAndUserData.vlPremio.toString(),
-                    dsLogo: productAndUserData?.dsLogo+import.meta.env.VITE_THEME_BLOBS_KEY,
+                    dsLogo: productAndUserData?.dsLogo,
                   }} />
                 </PaymentFormLayout.Aside>
               </PaymentFormLayout.Root>
